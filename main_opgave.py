@@ -1,11 +1,6 @@
 import tkinter  
 import mysql.connector
 
-def lort():
-    pass
-
-def lort2():
-    pass
 
 def main():
     pass
