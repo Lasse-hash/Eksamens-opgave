@@ -16,6 +16,8 @@ window3 = Toplevel(window)
 window3.geometry("940x800")
 window3.withdraw()
 
+machineStatus = ["OK", "LOW", "EMPTY", "OFFLINE"]
+
 
 #region Widgets
 def menuwidgets():
@@ -84,7 +86,7 @@ def menu3Widgets():
     status = Label(window3, text="Enter the machine status")
     status.place(x=10, y=105)
 
-    InsertButton = Button(window3, text="Insert Machine", command=insertItem)
+    InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_machineID, txt_location, txt_status))
     InsertButton.place(x=25, y=145)
 
     GetButton = Button(window3, text="Get Machine", command=getValues)
@@ -120,6 +122,14 @@ def showmenu3():
 #endregion
 
 #region Insert Funtion
+def insertMachine(machineID, machineLocation, status):
+    machineid = machineID.get()
+    machinelocation = machineLocation.get()
+    Status = status.get()
+    if machinelocation == "" or machineid == "" or Status not in machineStatus:
+        messagebox.showinfo("insert status", "all fields required")
+    else: messagebox.showinfo("Insert Status", f"Inserted {machineid} in {machinelocation} with status: {Status}")
+
 def insertItem(itemID, machineID, amount):
     itemid = itemID.get()
     machineid = machineID.get()
