@@ -50,7 +50,7 @@ def menu2Widgets():
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
 
-    InsertButton = Button(window2, text="Insert item", command=insertItem)
+    InsertButton = Button(window2, text="Insert item", command=lambda: insertItem(txt_Item, txt_machineID, txt_itemAmount))
     InsertButton.place(x=15, y=165)
 
     GetButton = Button(window2, text="Get ID", command=getValues)
@@ -120,8 +120,13 @@ def showmenu3():
 #endregion
 
 #region Insert Funtion
-def insertItem():
-    pass
+def insertItem(itemID, machineID, amount):
+    itemid = itemID.get()
+    machineid = machineID.get()
+    Amount = amount.get()
+    if itemid == "" or machineid == "" or Amount == "":
+        messagebox.showinfo("insert status", "all fields required")
+    else: messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
 #endregion
 
 #region Get Funtion
