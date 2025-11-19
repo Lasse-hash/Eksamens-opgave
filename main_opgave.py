@@ -105,10 +105,15 @@ def menu3Widgets():
     GetButton = Button(window3, text="Get Machine", command=getValues)
     GetButton.place(x=25, y=185)
 
-    DeleteButton = Button(window3, text="Delete Machine", command=deleteThings)
+    DeleteButton = Button(
+    window3, 
+    text="Delete Machine", 
+    command=lambda: delete_Vending(txt_machineID)
+)
+
     DeleteButton.place(x=140, y=145)
 
-    UpdateButton = Button(window3, text="Update Information", command=lambda: updateValues(txt_machineID, txt_location, txt_status, None, None))
+    UpdateButton = Button(window3, text="Update Information", command=lambda: updateValues(txt_machineID, txt_location, machineStatusVar, None, None))
     UpdateButton.place(x=140, y=185)
 
     MenuButton = Button(window3, text="Menu", command=showmenu)
@@ -311,8 +316,49 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
 #endregion
 
 #region Delete Funtion
+def delete_Vending(txt_machineID):
+    machineID = txt_machineID.get().strip()
+    if not machineID:
+        return messagebox.showerror("Delete Error", "Please enter a machine ID")
+
+    try:
+        conn = mysql.connector.connect(
+            host=config["DB_HOST"],
+            user=config["DB_USER"],
+            password=config["DB_PASSWORD"],
+            database=config["DB_NAME"]
+        )
+        cursor = conn.cursor()
+
+        # Check if machine exists
+        cursor.execute("SELECT id FROM vending_machines WHERE id=%s", (machineID,))
+        if not cursor.fetchone():
+            return messagebox.showerror("Delete Error", f"Machine {machineID} does not exist.")
+
+        # Confirm deletion
+        if not messagebox.askyesno("Confirm Delete", f"Delete machine {machineID}?"):
+            return
+
+        # Delete items and machine
+        cursor.execute("DELETE FROM items WHERE vending_machine_id=%s", (machineID,))
+        cursor.execute("DELETE FROM vending_machines WHERE id=%s", (machineID,))
+        conn.commit()
+
+        messagebox.showinfo("Delete Status", f"Vending machine {machineID} deleted successfully")
+
+    except mysql.connector.Error as err:
+        messagebox.showerror("Database Error", f"Error: {err}")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def deleteThings():
     pass
+
+
+
 #endregion
 
 #region Main
