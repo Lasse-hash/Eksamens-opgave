@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from dotenv import dotenv_values
 import mysql.connector
+from datetime import datetime
 
 window = Tk()
 
@@ -71,7 +72,7 @@ def menu2Widgets():
     DeleteButton = Button(window2, text="Delete", command=deleteThings)
     DeleteButton.place(x=140, y=165)
 
-    UpdateButton = Button(window2, text="Update", command=updateValues)
+    UpdateButton = Button(window2, text="Update", command=lambda: updateValues(txt_machineID, None, None, txt_Item, txt_itemAmount))
     UpdateButton.place(x=195, y=165)
 
     MenuButton = Button(window2, text="Menu", command=showmenu)
@@ -107,7 +108,7 @@ def menu3Widgets():
     DeleteButton = Button(window3, text="Delete Machine", command=deleteThings)
     DeleteButton.place(x=140, y=145)
 
-    UpdateButton = Button(window3, text="Update Information", command=updateValues)
+    UpdateButton = Button(window3, text="Update Information", command=lambda: updateValues(txt_machineID, txt_location, txt_status, None, None))
     UpdateButton.place(x=140, y=185)
 
     MenuButton = Button(window3, text="Menu", command=showmenu)
@@ -182,17 +183,18 @@ def showmenu4():
 #endregion
 
 #region Insert Funtion
-def insertMachine(machineID, machineLocation, status, priceAmount):
+def insertMachine(machineID, machineLocation, status):
     machineid = machineID.get()
     machinelocation = machineLocation.get()
     Status = status.get()
-    priceAmount = priceAmount.get()
     if machinelocation == "" or machineid == "" or Status not in machineStatus:
         messagebox.showinfo("insert status", "all fields required")
-
     else: 
+        now = datetime.now()
+        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObject = conn.cursor()
+        cursorObject.execute("INSERT INTO vending_machines (location, status, last_refill) VALUES (%s, %s, %s)", (machinelocation, Status, timestamp))
         conn.commit()
         cursorObject.close()
         messagebox.showinfo("insert status", "inserted machine into database")
@@ -241,8 +243,71 @@ def getValues():
 #endregion
 
 #region Update Funtion
-def updateValues():
-    pass
+def updateValues(machineid, machinelocation, status, machineitem, itemamount):
+    machineID = machineid.get()
+    if machineID == "":
+        messagebox.showinfo("Update Status", "Failed: Must put machine id")
+    else:
+        conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
+        cursorObjekt = conn.cursor()
+
+        
+        if machinelocation is not None:
+            machineLocation = machinelocation.get()
+        else:
+            machineItem = None
+       
+        if status is not None:
+            machinestatus = status.get()
+        else:
+            machinestatus = None
+        
+        if machineitem is not None:
+            machineItem = machineitem.get()
+        else:
+            machineItem = None
+
+        if itemamount is not None:
+            itemAmuont = itemamount.get()
+        else:
+            itemAmuont = None
+
+        if not (machineLocation or machinestatus or machineItem or itemAmuont):
+            messagebox.showinfo("Fetch status", "Need atleast one line filled")
+            return
+
+    if machinelocation or status:
+        sets = []
+        prams = []
+        if machinelocation:
+            sets.append("location=%s")
+            prams.append(machineLocation)
+        if status:
+            sets.append("status=%s")
+            prams.append(machinestatus)
+        prams.append(machineID)
+        cursorObjekt.execute(f"UPDATE vending_machines SET {', '.join(sets)} WHERE id=%s", tuple(prams))
+        messagebox.showinfo("Update Status", "Updated items")
+
+    if machineitem or itemamount is not None:
+        sets = []
+        prams = []
+        if machineitem:
+            sets.append("item_name=%s")
+            prams.append(machineItem)
+        if itemamount is not None:
+            sets.append("quantity=%s")
+            prams.append(itemAmuont)
+        prams.append(machineID)  # assuming vending_machine_id = machineID
+        cursorObjekt.execute(f"UPDATE items SET {', '.join(sets)} WHERE vending_machine_id=%s", tuple(prams))
+        messagebox.showinfo("Update Status", "Updated items")
+
+    conn.commit()
+    conn.close()
+
+
+
+        
 #endregion
 
 #region Delete Funtion
