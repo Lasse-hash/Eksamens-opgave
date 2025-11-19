@@ -98,7 +98,7 @@ def menu3Widgets():
     status = Label(window3, text="Enter the machine status")
     status.place(x=10, y=105)
 
-    InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_machineID, txt_location, txt_status))
+    InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_machineID, txt_location, machineStatusVar))
     InsertButton.place(x=25, y=145)
 
     GetButton = Button(window3, text="Get Machine", command=getValues)
