@@ -91,8 +91,10 @@ def menu3Widgets():
     location = Label(window3, text="Enter location")
     location.place(x=10, y=75)
 
-    txt_status = Entry(window3, width=25)
-    txt_status.place(x=155, y=105)
+    machineStatusVar = StringVar(window3)
+    machineStatusVar.set(machineStatus[0])
+    machineStatusMenu = OptionMenu(window3, machineStatusVar, *machineStatus)
+    machineStatusMenu.place(x=155, y=105)
     status = Label(window3, text="Enter the machine status")
     status.place(x=10, y=105)
 
@@ -137,18 +139,18 @@ def menu4Widgets():
     employeeMessage = Label(window4, text="Employee name")
     employeeMessage.place(x=10, y=145)  
 
-    InsertButton = Button(window4, text="Send Message", command=lambda: messagebox.showinfo("Report sent", f"Your message '{variable.get()}' has been sent to the {txt_employeeMessage.get()} at {txt_machineID.get()} for machine ID {txt_location.get()}"))
+    InsertButton = Button(window4, text="Send Report", command=lambda: messagebox.showinfo("Report sent", f"Your message '{variable.get()}' has been sent to the {txt_employeeMessage.get()} at {txt_machineID.get()} for machine ID {txt_location.get()}"))
     InsertButton.place(x=15, y=185)
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
-    MenuButton.place(x=150, y=250)
+    MenuButton.place(x=120, y=185)
 
-#endregion
 
 
 def showmenu():
     window2.withdraw()
     window3.withdraw()
+    window4.withdraw()
     window.deiconify()
 
 def showmenu2():
