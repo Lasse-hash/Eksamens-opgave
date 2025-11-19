@@ -143,6 +143,8 @@ def menu4Widgets():
     MenuButton = Button(window4, text="Menu", command=showmenu)
     MenuButton.place(x=150, y=250)
 
+#endregion
+
 
 def showmenu():
     window2.withdraw()
