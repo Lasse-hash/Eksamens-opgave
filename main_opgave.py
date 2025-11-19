@@ -44,10 +44,10 @@ def menu2Widgets():
     itemAmount = Label(window2, text="Enter amount of item")
     itemAmount.place(x=10, y=105)
 
-    txt_aThing = Entry(window2, width=25)
-    txt_aThing.place(x=155, y=135)
-    aThing = Label(window2, text="??????")
-    aThing.place(x=10, y=135)
+    #txt_aThing = Entry(window2, width=25)
+    #txt_aThing.place(x=155, y=135)
+    #aThing = Label(window2, text="??????")
+    #aThing.place(x=10, y=135)
 
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
