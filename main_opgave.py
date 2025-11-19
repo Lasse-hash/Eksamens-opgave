@@ -1,10 +1,13 @@
 from tkinter import *
 from tkinter import messagebox
+from dotenv import dotenv_values
 import mysql.connector
 
 window = Tk()
 
 window.geometry("350x150")
+
+config = dotenv_values(".env")
 
 window.title("Vending Machine management")
 
@@ -43,11 +46,6 @@ def menu2Widgets():
     txt_itemAmount.place(x=155, y=105)
     itemAmount = Label(window2, text="Enter amount of item")
     itemAmount.place(x=10, y=105)
-
-    #txt_aThing = Entry(window2, width=25)
-    #txt_aThing.place(x=155, y=135)
-    #aThing = Label(window2, text="??????")
-    #aThing.place(x=10, y=135)
 
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
@@ -129,10 +127,11 @@ def insertMachine(machineID, machineLocation, status):
     if machinelocation == "" or machineid == "" or Status not in machineStatus:
         messagebox.showinfo("insert status", "all fields required")
     else: 
-        conn = mysql.connector.connect(host="localhost", user="root", password="130301", database="vending")
+        conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObject = conn.cursor()
         cursorObject.execute("INSERT INTO vending_machines (id, location, status) VALUES (%s, %s, %s)", (machineid, machinelocation, Status)) 
         conn.commit()
+        cursorObject.close()
         messagebox.showinfo("insert status", "inserted machine into database")
         conn.close()
 
@@ -172,4 +171,20 @@ def main():
 #endregion
 
 if __name__ == "__main__":
+    
+    conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"])
+    cursor = conn.connect()
+    
+    sql_file = "vending_machine_database.sql"
+    with open(sql_file, "r") as f:
+        sql_commands = f.read()
+    
+    for command in sql_commands.split(";"):
+        cmd = command.strip()
+        if cmd:
+            cursor.execute(cmd)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
     main()
