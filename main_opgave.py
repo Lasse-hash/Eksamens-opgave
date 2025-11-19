@@ -88,7 +88,7 @@ def menu3Widgets():
 
     txt_location = Entry(window3, width=25)
     txt_location.place(x=155, y=75)
-    location = Label(window3, text="Enter location")
+    location = Label(window3, text="Enter City")
     location.place(x=10, y=75)
 
     machineStatusVar = StringVar(window3)
@@ -119,7 +119,7 @@ def menu3Widgets():
 def menu4Widgets():
     txt_location = Entry(window4, width=25)
     txt_location.place(x=155, y=35) 
-    location = Label(window4, text="Enter location")
+    location = Label(window4, text="Enter City")
     location.place(x=10, y=75)
 
     txt_machineID = Entry(window4, width=25)
@@ -139,7 +139,19 @@ def menu4Widgets():
     employeeMessage = Label(window4, text="Employee name")
     employeeMessage.place(x=10, y=145)  
 
-    InsertButton = Button(window4, text="Send Report", command=lambda: messagebox.showinfo("Report sent", f"Your message '{variable.get()}' has been sent to the {txt_employeeMessage.get()} at {txt_machineID.get()} for machine ID {txt_location.get()}"))
+    def sendReport():
+        employee = txt_employeeMessage.get().strip()
+        if not employee.replace(" ", "").isalpha():  
+            messagebox.showerror("Input Error", "Employee name must contain only letters")
+            return
+
+        
+        messagebox.showinfo(
+            "Report sent",
+            f"Your message '{variable.get()}' has been sent to {employee} at {txt_machineID.get()} for machine ID {txt_location.get()}"
+        )
+
+    InsertButton = Button(window4, text="Send Report", command=sendReport)
     InsertButton.place(x=15, y=185)
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
@@ -193,31 +205,31 @@ def insertItem(itemID, machineID, amount, priceAmount):
     Amount = amount.get().strip()
     price = priceAmount.get().strip()
 
-    # Check if any field is empty
+    
     if itemid == "" or machineid == "" or Amount == "" or price == "":
         messagebox.showerror("Insert Error", "All fields are required")
         return
 
-    # Check if item name contains only letters and spaces
+    
     if not itemid.replace(" ", "").isalpha():
         messagebox.showerror("Insert Error", "Item name must contain only letters")
         return
 
-    # Check if amount is a number
+   
     try:
         Amount = int(Amount)
     except ValueError:
         messagebox.showerror("Insert Error", "Amount must be a number")
         return
 
-    # Check if price is a number
+    
     try:
         price = float(price)
     except ValueError:
         messagebox.showerror("Insert Error", "Price must be a number")
         return
 
-    # Success
+    
     messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid} at price {price}")
 
 
