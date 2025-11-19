@@ -65,7 +65,7 @@ def menu2Widgets():
     GetButton = Button(window2, text="Get ID", command=getValues)
     GetButton.place(x=90, y=165)
 
-    DeleteButton = Button(window2, text="Delete", command=deleteThings)
+    DeleteButton = Button(window2, text="Delete", command=lambda: deleteItem(txt_Item))
     DeleteButton.place(x=140, y=165)
 
     UpdateButton = Button(window2, text="Update", command=lambda: updateValues(txt_machineID, None, None, txt_Item, txt_itemAmount))
@@ -403,8 +403,8 @@ def delete_Vending(txt_machineID):
         conn.close()
 
 def deleteItem(itemID):
-    itemID = itemID.get().strip()
-    if not itemID:
+    item = itemID.get().strip()
+    if not item:
         return messagebox.showerror("Delete Error", "Please enter an item ID")
     
     try:
@@ -416,30 +416,24 @@ def deleteItem(itemID):
         )
         cursor = conn.cursor()
 
-        cursor.execute("SELECT id FROM items WHERE id=%s", (itemID,))
+        cursor.execute("SELECT id FROM items WHERE item_name=%s", (item,))
         if not cursor.fetchone():
-            return messagebox.showerror("Delete Error", f"Item {itemID} does not exist.")
+            return messagebox.showerror("Delete Error", f"Item {item} does not exist.")
         
-        if not messagebox.askyesno("Confirm Delete", f"Delete item {itemID}?"):
+        if not messagebox.askyesno("Confirm Delete", f"Delete item {item}?"):
             return
         
-        cursor.execute("DELETE FROM items WHERE id=%s", (itemID,))
+        cursor.execute("DELETE FROM items WHERE item_name=%s", (item,))
         conn.commit()
 
-        messagebox.showinfo("Delete Status", f"Item {itemID} deleted successfully")
+        messagebox.showinfo("Delete Status", f"Item {item} deleted successfully")
 
     except mysql.connector.Error as err:
         messagebox.showerror("Database Error", f"Error: {err}")
     finally:
         cursor.close()
         conn.close()   
-         
-
-
-def deleteThings():
-    pass
-
-
+        
 
 #endregion
 
