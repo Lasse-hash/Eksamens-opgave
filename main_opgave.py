@@ -7,7 +7,7 @@ window = Tk()
 
 window.geometry("350x150")
 
-config = dotenv_values(".env")
+config = dotenv_values(r"C:\Users\Bruger\Documents\første semesterprøve\Eksamens-opgave\.env")
 
 window.title("Vending Machine management")
 
@@ -173,9 +173,9 @@ def main():
 if __name__ == "__main__":
     
     conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"])
-    cursor = conn.connect()
+    cursor = conn.cursor()
     
-    sql_file = "vending_machine_database.sql"
+    sql_file = r"C:\Users\Bruger\Documents\første semesterprøve\Eksamens-opgave\vending_machine_database.sql"
     with open(sql_file, "r") as f:
         sql_commands = f.read()
     
