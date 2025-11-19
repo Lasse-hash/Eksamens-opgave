@@ -128,7 +128,13 @@ def insertMachine(machineID, machineLocation, status):
     Status = status.get()
     if machinelocation == "" or machineid == "" or Status not in machineStatus:
         messagebox.showinfo("insert status", "all fields required")
-    else: messagebox.showinfo("Insert Status", f"Inserted {machineid} in {machinelocation} with status: {Status}")
+    else: 
+        conn = mysql.connector.connect(host="localhost", user="root", password="130301", database="vending")
+        cursorObject = conn.cursor()
+        cursorObject.execute("INSERT INTO vending_machines (id, location, status) VALUES (%s, %s, %s)", (machineid, machinelocation, Status)) 
+        conn.commit()
+        messagebox.showinfo("insert status", "inserted machine into database")
+        conn.close()
 
 def insertItem(itemID, machineID, amount):
     itemid = itemID.get()
