@@ -62,7 +62,7 @@ def menu2Widgets():
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
 
-    InsertButton = Button(window2, text="Insert item", command=lambda: insertItem(txt_Item, txt_machineID, txt_itemAmount))
+    InsertButton = Button(window2, text="Insert item", command=lambda: insertItem(txt_Item, txt_machineID, txt_itemAmount, txt_priceAmount))
     InsertButton.place(x=15, y=165)
 
     GetButton = Button(window2, text="Get ID", command=getValues)
@@ -188,14 +188,39 @@ def insertMachine(machineID, machineLocation, status, priceAmount):
 
 
 def insertItem(itemID, machineID, amount, priceAmount):
+    itemid = itemID.get().strip()
+    machineid = machineID.get().strip()
+    Amount = amount.get().strip()
+    price = priceAmount.get().strip()
 
-    itemid = itemID.get()
-    machineid = machineID.get()
-    Amount = amount.get()
-    priceAmount = priceAmount.get()
-    if itemid == "" or machineid == "" or Amount == "" or priceAmount == "":
-        messagebox.showinfo("insert status", "all fields required")
-    else: messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
+    # Check if any field is empty
+    if itemid == "" or machineid == "" or Amount == "" or price == "":
+        messagebox.showerror("Insert Error", "All fields are required")
+        return
+
+    # Check if item name contains only letters and spaces
+    if not itemid.replace(" ", "").isalpha():
+        messagebox.showerror("Insert Error", "Item name must contain only letters")
+        return
+
+    # Check if amount is a number
+    try:
+        Amount = int(Amount)
+    except ValueError:
+        messagebox.showerror("Insert Error", "Amount must be a number")
+        return
+
+    # Check if price is a number
+    try:
+        price = float(price)
+    except ValueError:
+        messagebox.showerror("Insert Error", "Price must be a number")
+        return
+
+    # Success
+    messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid} at price {price}")
+
+
 #endregion
 
 #region Get Funtion
