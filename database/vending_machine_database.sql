@@ -4,7 +4,7 @@ use vending;
 create table if not exists vending_machines (
 	id INT AUTO_INCREMENT PRIMARY KEY,
     location VARCHAR(255) NOT NULL,
-    status ENUM("OK", "LOW", "EMPTY", "OFFLINE") DEFAULT "OK",
+    status ENUM("FULL", "HALF", "LOW", "EMPTY", "OFFLINE") DEFAULT "FULL",
     last_refill DATETIME
 );
 

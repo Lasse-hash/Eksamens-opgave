@@ -16,7 +16,7 @@ window3 = Toplevel(window)
 window3.geometry("940x800")
 window3.withdraw()
 
-machineStatus = ["OK", "LOW", "EMPTY", "OFFLINE"]
+machineStatus = ["FULL","HALF", "LOW", "EMPTY", "OFFLINE"]
 
 
 #region Widgets
