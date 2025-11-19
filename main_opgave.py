@@ -206,7 +206,32 @@ def insertItem(itemID, machineID, amount):
     itemid = itemID.get().strip()
     machineid = machineID.get().strip()
     Amount = amount.get().strip()
+    if itemid == "" or machineid == "" or Amount == "":
+        messagebox.showinfo("Insert Status", "All fields required")
+    else:
+        try:
+            Amount = int(Amount)  # Make sure amount is a number
+        except ValueError:
+            return messagebox.showerror("Insert Error", "Amount must be a number")
 
+    conn = mysql.connector.connect(
+        host=config["DB_HOST"],
+        user=config["DB_USER"],
+        password=config["DB_PASSWORD"],
+        database=config["DB_NAME"]
+    )
+    cursor = conn.cursor()
+
+    # Insert item into the items table
+    cursor.execute(
+        "INSERT INTO items (item_name, quantity, vending_machine_id) VALUES (%s, %s, %s)",
+        (itemid, Amount, machineid)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
 
     
     if itemid == "" or machineid == "" or Amount == "":
@@ -224,10 +249,6 @@ def insertItem(itemID, machineID, amount):
     except ValueError:
         messagebox.showerror("Insert Error", "Amount must be a number")
         return
-
-    
-    
-
     
     messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
 
