@@ -24,7 +24,7 @@ window4 = Toplevel(window)
 window4.geometry("940x800")
 window4.withdraw()
 
-machineStatus = ["FULL","HALF", "LOW", "EMPTY", "OFFLINE"]
+machineStatus = ["FULL","HALF", "LOW", "EMPTY", "OFFLINE", "NONE"]
 
 options = ["NONE", "Refill machine", "Report issue", "Request maintenance"]
 
@@ -98,7 +98,7 @@ def menu3Widgets():
     InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_machineID, txt_location, machineStatusVar))
     InsertButton.place(x=25, y=145)
 
-    GetButton = Button(window3, text="Get Machine", command=getValues)
+    GetButton = Button(window3, text="Get Machine", command=lambda: getValues(txt_machineID, txt_location, machineStatusVar, Gettxt))
     GetButton.place(x=25, y=185)
 
     DeleteButton = Button(
@@ -188,7 +188,7 @@ def insertMachine(machineID, machineLocation, status):
     machineid = machineID.get()
     machinelocation = machineLocation.get()
     Status = status.get()
-    if machinelocation == "" or machineid == "" or Status not in machineStatus:
+    if machinelocation == "" or machineid == "" or Status == machineStatus[5]:
         messagebox.showinfo("insert status", "all fields required")
     else: 
         now = datetime.now()
@@ -256,8 +256,44 @@ def insertItem(itemID, machineID, amount):
 #endregion
 
 #region Get Funtion
-def getValues():
-    pass
+def getValues(machineid, machinelocation, status, Gettxt):
+    machineID = machineid.get()
+    machineLocation = machinelocation.get()
+    machinestatus = status.get()
+    if machineID == "" and machineLocation == "" and machinestatus == machineStatus[5]:
+        messagebox.showinfo("Update Status", "Failed: Must put machine id")
+    else:
+        conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
+        cursorObjeckt = conn.cursor()
+
+        params = []
+        condition = []
+
+        if machineID.strip():
+            condition.append("id=%s")
+            params.append(machineID.strip())
+        if machineLocation.strip():
+            condition.append("location=%s")
+            params.append(machineLocation.strip())
+        if machinestatus.strip():
+            condition.append("status=%s")
+            params.append(machinestatus.strip())
+
+        query = "SELECT * FROM vending_machines"
+        if condition:
+            query += " WHERE " + " AND ".join(condition)
+
+        cursorObjeckt.execute(query, tuple(params))
+
+        rows = cursorObjeckt.fetchall()
+        Gettxt.delete("1.0", "end")
+        if rows:
+            row = rows[0]
+            Gettxt.insert("end", f"Machine location: {row[1]} \n\n")
+            Gettxt.insert("end", f"Machine status: {row[2]} \n\n")
+        else:
+            Gettxt.insert("end", "No matching machine found.")
+
 #endregion
 
 #region Update Funtion
