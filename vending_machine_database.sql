@@ -14,7 +14,7 @@ create table if not exists items (
     vending_machine_id INT NOT NULL,
     item_name VARCHAR(100) NOT NULL,
     quantity INT DEFAULT 0,
-    low_threshold INT default 5,
+
     
     FOREIGN KEY (vending_machine_id) REFERENCES vending_machines(id)
 );
