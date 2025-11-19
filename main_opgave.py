@@ -19,8 +19,13 @@ window3 = Toplevel(window)
 window3.geometry("940x800")
 window3.withdraw()
 
+window4 = Toplevel(window)
+window4.geometry("940x800")
+window4.withdraw()
+
 machineStatus = ["FULL","HALF", "LOW", "EMPTY", "OFFLINE"]
 
+options = ["Refill machine", "Report issue", "Request maintenance"]
 
 #region Widgets
 def menuwidgets():
@@ -30,6 +35,8 @@ def menuwidgets():
     fillmachineButton = Button(window, text="Fill Vending Machine", command=showmenu2)
     fillmachineButton.place(x=190, y=40)
 
+    KontaktmedarbejderButton = Button(window, text="Contact Employee", command=showmenu4)
+    KontaktmedarbejderButton.place(x=120, y=80)
 
 def menu2Widgets():
     txt_machineID = Entry(window2, width=25)
@@ -102,6 +109,36 @@ def menu3Widgets():
     Gettxt = Text(window3, width=50)
     Gettxt.place(x=350, y=30)
 
+def menu4Widgets():
+    txt_location = Entry(window4, width=25)
+    txt_location.place(x=155, y=35) 
+    location = Label(window4, text="Enter location")
+    location.place(x=10, y=75)
+
+    txt_machineID = Entry(window4, width=25)
+    txt_machineID.place(x=155, y=75)
+    machineID = Label(window4, text="Enter vending machine ID")
+    machineID.place(x=10, y=35)
+
+    variable = StringVar(window4)
+    variable.set(options[0])
+    optionsMenu = OptionMenu(window4, variable, *options)
+    optionsMenu.place(x=155, y=105)
+    optionLabel = Label(window4, text="Select an option")
+    optionLabel.place(x=10, y=105)
+
+    txt_employeeMessage = Entry(window4, width=25)
+    txt_employeeMessage.place(x=155, y=145)
+    employeeMessage = Label(window4, text="Contact Employee")
+    employeeMessage.place(x=10, y=145)
+    
+    insertButton = Button(window4, text="Send Message", command=lambda: messagebox.showinfo("Message Sent", f"Message sent to employee regarding {variable.get()} at location {txt_location.get()} for machine ID {txt_machineID.get()}"))
+    insertButton.place(x=15, y=185)
+
+    MenuButton = Button(window4, text="Menu", command=showmenu)
+    MenuButton.place(x=150, y=250)
+
+
 
 def showmenu():
     window2.withdraw()
@@ -117,6 +154,11 @@ def showmenu3():
     window.withdraw()
     window2.withdraw()
     window3.deiconify()
+
+def showmenu4():
+    window.withdraw()
+    window2.withdraw()
+    window4.deiconify()
 #endregion
 
 #region Insert Funtion
@@ -165,6 +207,7 @@ def main():
     
     menu2Widgets()
     menu3Widgets()
+    menu4Widgets()
     menuwidgets()
 
     window.mainloop()
