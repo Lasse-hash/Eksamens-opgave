@@ -132,10 +132,14 @@ def menu4Widgets():
     employeeMessage = Label(window4, text="Employee name")
     employeeMessage.place(x=10, y=145)
     
+<<<<<<< Updated upstream
     insertButton = Button(window4, text="Contact Employee",\
                         command=lambda: messagebox.showinfo("Message Sent",\
                         f"Message sent to {txt_employeeMessage.get()} regarding {variable.get()}\
                         at location {txt_location.get()} for machine ID {txt_machineID.get()}"))
+=======
+    insertButton = Button(window4, text="Send Report", command=lambda: messagebox.showinfo("Message Sent", f"Message sent to employee regarding {variable.get()} at location {txt_location.get()} for machine ID {txt_machineID.get()}"))
+>>>>>>> Stashed changes
     insertButton.place(x=15, y=185)
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
