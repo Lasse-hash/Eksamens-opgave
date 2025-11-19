@@ -7,7 +7,7 @@ window = Tk()
 
 window.geometry("350x150")
 
-config = dotenv_values(r"C:\Users\Bruger\Documents\første semesterprøve\Eksamens-opgave\.env")
+config = dotenv_values(r".env")
 
 window.title("Vending Machine management")
 
@@ -137,11 +137,13 @@ def menu4Widgets():
     employeeMessage = Label(window4, text="Employee name")
     employeeMessage.place(x=10, y=145)  
 
-    InsertButton = Button(window4, text="Contact Employee",command=lambda: messagebox.showinfo("Message Sent"f"Message sent to {txt_employeeMessage.get()} regarding {variable.get()}at location {txt_location.get()} for machine ID {txt_machineID.get()}"))
+    InsertButton = Button(window4, text="Send Message", command=lambda: messagebox.showinfo("Report sent", f"Your message '{variable.get()}' has been sent to the {txt_employeeMessage.get()} at {txt_machineID.get()} for machine ID {txt_location.get()}"))
     InsertButton.place(x=15, y=185)
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
     MenuButton.place(x=150, y=250)
+
+#endregion
 
 
 def showmenu():
@@ -173,7 +175,10 @@ def insertMachine(machineID, machineLocation, status, priceAmount):
     priceAmount = priceAmount.get()
     if machinelocation == "" or machineid == "" or Status not in machineStatus:
         messagebox.showinfo("insert status", "all fields required")
-    else: messagebox.showinfo("Insert Status", f"Inserted {machineid} in {machinelocation} with status: {Status}")
+
+    else: 
+        conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
+        cursorObject = conn.cursor()
         conn.commit()
         cursorObject.close()
         messagebox.showinfo("insert status", "inserted machine into database")
@@ -181,9 +186,6 @@ def insertMachine(machineID, machineLocation, status, priceAmount):
 
 
 def insertItem(itemID, machineID, amount, priceAmount):
-
-
-def insertItem(itemID, machineID, amount):
 
     itemid = itemID.get()
     machineid = machineID.get()
@@ -226,7 +228,7 @@ if __name__ == "__main__":
     conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"])
     cursor = conn.cursor()
     
-    sql_file = r"C:\Users\Bruger\Documents\første semesterprøve\Eksamens-opgave\vending_machine_database.sql"
+    sql_file = r"vending_machine_database.sql"
     with open(sql_file, "r") as f:
         sql_commands = f.read()
     
