@@ -55,15 +55,11 @@ def menu2Widgets():
     itemAmount = Label(window2, text="Enter amount of item")
     itemAmount.place(x=10, y=105)
 
-    txt_priceAmount = Entry(window2, width=25)
-    txt_priceAmount.place(x=155, y=135)
-    priceAmount = Label(window2, text="Enter price amount")
-    priceAmount.place(x=10, y=135)
 
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
 
-    InsertButton = Button(window2, text="Insert item", command=lambda: insertItem(txt_Item, txt_machineID, txt_itemAmount, txt_priceAmount))
+    InsertButton = Button(window2, text="Insert item", command=lambda: insertItem(txt_Item, txt_machineID, txt_itemAmount))
     InsertButton.place(x=15, y=165)
 
     GetButton = Button(window2, text="Get ID", command=getValues)
@@ -206,14 +202,14 @@ def insertMachine(machineID, machineLocation, status):
         conn.close()
 
 
-def insertItem(itemID, machineID, amount, priceAmount):
+def insertItem(itemID, machineID, amount):
     itemid = itemID.get().strip()
     machineid = machineID.get().strip()
     Amount = amount.get().strip()
-    price = priceAmount.get().strip()
+
 
     
-    if itemid == "" or machineid == "" or Amount == "" or price == "":
+    if itemid == "" or machineid == "" or Amount == "":
         messagebox.showerror("Insert Error", "All fields are required")
         return
 
@@ -230,14 +226,10 @@ def insertItem(itemID, machineID, amount, priceAmount):
         return
 
     
-    try:
-        price = float(price)
-    except ValueError:
-        messagebox.showerror("Insert Error", "Price must be a number")
-        return
+    
 
     
-    messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid} at price {price}")
+    messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
 
 
 #endregion
