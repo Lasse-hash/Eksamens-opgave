@@ -44,10 +44,10 @@ def menu2Widgets():
     itemAmount = Label(window2, text="Enter amount of item")
     itemAmount.place(x=10, y=105)
 
-    txt_aThing = Entry(window2, width=25)
-    txt_aThing.place(x=155, y=135)
-    aThing = Label(window2, text="??????")
-    aThing.place(x=10, y=135)
+    txt_priceAmount = Entry(window2, width=25)
+    txt_priceAmount.place(x=155, y=135)
+    priceAmount = Label(window2, text="Enter price amount")
+    priceAmount.place(x=10, y=135)
 
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
@@ -122,19 +122,32 @@ def showmenu3():
 #endregion
 
 #region Insert Funtion
-def insertMachine(machineID, machineLocation, status):
+def insertMachine(machineID, machineLocation, status, priceAmount):
     machineid = machineID.get()
     machinelocation = machineLocation.get()
     Status = status.get()
+    priceAmount = priceAmount.get()
     if machinelocation == "" or machineid == "" or Status not in machineStatus:
         messagebox.showinfo("insert status", "all fields required")
+<<<<<<< Updated upstream
     else: messagebox.showinfo("Insert Status", f"Inserted {machineid} in {machinelocation} with status: {Status}")
+=======
+    else: 
+        conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
+        cursorObject = conn.cursor()
+        cursorObject.execute("INSERT INTO vending_machines (id, location, status, price_amount) VALUES (%s, %s, %s, %s)", (machineid, machinelocation, Status, priceAmount)) 
+        conn.commit()
+        cursorObject.close()
+        messagebox.showinfo("insert status", "inserted machine into database")
+        conn.close()
+>>>>>>> Stashed changes
 
-def insertItem(itemID, machineID, amount):
+def insertItem(itemID, machineID, amount, priceAmount):
     itemid = itemID.get()
     machineid = machineID.get()
     Amount = amount.get()
-    if itemid == "" or machineid == "" or Amount == "":
+    priceAmount = priceAmount.get()
+    if itemid == "" or machineid == "" or Amount == "" or priceAmount == "":
         messagebox.showinfo("insert status", "all fields required")
     else: messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
 #endregion
