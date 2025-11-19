@@ -108,7 +108,7 @@ def menu3Widgets():
     DeleteButton = Button(window3, text="Delete Machine", command=deleteThings)
     DeleteButton.place(x=140, y=145)
 
-    UpdateButton = Button(window3, text="Update Information", command=lambda: updateValues(txt_machineID, txt_location, txt_status, None, None))
+    UpdateButton = Button(window3, text="Update Information", command=lambda: updateValues(txt_machineID, txt_location, machineStatusVar, None, None))
     UpdateButton.place(x=140, y=185)
 
     MenuButton = Button(window3, text="Menu", command=showmenu)
