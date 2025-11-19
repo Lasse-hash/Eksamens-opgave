@@ -7,7 +7,7 @@ window = Tk()
 
 window.geometry("350x150")
 
-config = dotenv_values(r"C:\Users\Bruger\Documents\første semesterprøve\Eksamens-opgave\.env")
+config = dotenv_values(r".env")
 
 window.title("Vending Machine management")
 
@@ -53,6 +53,11 @@ def menu2Widgets():
     txt_itemAmount.place(x=155, y=105)
     itemAmount = Label(window2, text="Enter amount of item")
     itemAmount.place(x=10, y=105)
+
+    txt_priceAmount = Entry(window2, width=25)
+    txt_priceAmount.place(x=155, y=135)
+    priceAmount = Label(window2, text="Enter price amount")
+    priceAmount.place(x=10, y=135)
 
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
@@ -128,16 +133,17 @@ def menu4Widgets():
     optionLabel.place(x=10, y=105)
 
     txt_employeeMessage = Entry(window4, width=25)
-    txt_employeeMessage.place(x=155, y=145)
-    employeeMessage = Label(window4, text="Contact Employee")
-    employeeMessage.place(x=10, y=145)
-    
-    insertButton = Button(window4, text="Send Message", command=lambda: messagebox.showinfo("Message Sent", f"Message sent to employee regarding {variable.get()} at location {txt_location.get()} for machine ID {txt_machineID.get()}"))
-    insertButton.place(x=15, y=185)
+    txt_employeeMessage.place(x=155, y=145) 
+    employeeMessage = Label(window4, text="Employee name")
+    employeeMessage.place(x=10, y=145)  
+
+    InsertButton = Button(window4, text="Send Message", command=lambda: messagebox.showinfo("Report sent", f"Your message '{variable.get()}' has been sent to the {txt_employeeMessage.get()} at {txt_machineID.get()} for machine ID {txt_location.get()}"))
+    InsertButton.place(x=15, y=185)
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
     MenuButton.place(x=150, y=250)
 
+#endregion
 
 
 def showmenu():
@@ -162,26 +168,30 @@ def showmenu4():
 #endregion
 
 #region Insert Funtion
-def insertMachine(machineID, machineLocation, status):
+def insertMachine(machineID, machineLocation, status, priceAmount):
     machineid = machineID.get()
     machinelocation = machineLocation.get()
     Status = status.get()
+    priceAmount = priceAmount.get()
     if machinelocation == "" or machineid == "" or Status not in machineStatus:
         messagebox.showinfo("insert status", "all fields required")
+
     else: 
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObject = conn.cursor()
-        cursorObject.execute("INSERT INTO vending_machines (id, location, status) VALUES (%s, %s, %s)", (machineid, machinelocation, Status)) 
         conn.commit()
         cursorObject.close()
         messagebox.showinfo("insert status", "inserted machine into database")
         conn.close()
 
-def insertItem(itemID, machineID, amount):
+
+def insertItem(itemID, machineID, amount, priceAmount):
+
     itemid = itemID.get()
     machineid = machineID.get()
     Amount = amount.get()
-    if itemid == "" or machineid == "" or Amount == "":
+    priceAmount = priceAmount.get()
+    if itemid == "" or machineid == "" or Amount == "" or priceAmount == "":
         messagebox.showinfo("insert status", "all fields required")
     else: messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
 #endregion
@@ -218,7 +228,7 @@ if __name__ == "__main__":
     conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"])
     cursor = conn.cursor()
     
-    sql_file = r"C:\Users\Bruger\Documents\første semesterprøve\Eksamens-opgave\vending_machine_database.sql"
+    sql_file = r"vending_machine_database.sql"
     with open(sql_file, "r") as f:
         sql_commands = f.read()
     
