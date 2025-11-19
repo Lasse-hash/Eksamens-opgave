@@ -26,7 +26,7 @@ window4.withdraw()
 
 machineStatus = ["FULL","HALF", "LOW", "EMPTY", "OFFLINE"]
 
-options = ["Refill machine", "Report issue", "Request maintenance"]
+options = ["NONE", "Refill machine", "Report issue", "Request maintenance"]
 
 #region Widgets
 def menuwidgets():
@@ -352,6 +352,39 @@ def delete_Vending(txt_machineID):
     finally:
         cursor.close()
         conn.close()
+
+def deleteItem(itemID):
+    itemID = itemID.get().strip()
+    if not itemID:
+        return messagebox.showerror("Delete Error", "Please enter an item ID")
+    
+    try:
+        conn = mysql.connector.connect(
+            host=config["DB_HOST"],
+            user=config["DB_USER"],
+            password=config["DB_PASSWORD"],
+            database=config["DB_NAME"]
+        )
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id FROM items WHERE id=%s", (itemID,))
+        if not cursor.fetchone():
+            return messagebox.showerror("Delete Error", f"Item {itemID} does not exist.")
+        
+        if not messagebox.askyesno("Confirm Delete", f"Delete item {itemID}?"):
+            return
+        
+        cursor.execute("DELETE FROM items WHERE id=%s", (itemID,))
+        conn.commit()
+
+        messagebox.showinfo("Delete Status", f"Item {itemID} deleted successfully")
+
+    except mysql.connector.Error as err:
+        messagebox.showerror("Database Error", f"Error: {err}")
+    finally:
+        cursor.close()
+        conn.close()   
+         
 
 
 def deleteThings():
