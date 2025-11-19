@@ -175,6 +175,7 @@ def insertMachine(machineID, machineLocation, status, priceAmount):
     priceAmount = priceAmount.get()
     if machinelocation == "" or machineid == "" or Status not in machineStatus:
         messagebox.showinfo("insert status", "all fields required")
+
     else: 
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObject = conn.cursor()
