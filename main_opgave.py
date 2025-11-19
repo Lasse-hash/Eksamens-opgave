@@ -133,16 +133,15 @@ def menu4Widgets():
     optionLabel.place(x=10, y=105)
 
     txt_employeeMessage = Entry(window4, width=25)
-    txt_employeeMessage.place(x=155, y=145)
-    employeeMessage = Label(window4, text="Contact Employee")
-    employeeMessage.place(x=10, y=145)
-    
-    insertButton = Button(window4, text="Send Message", command=lambda: messagebox.showinfo("Message Sent", f"Message sent to employee regarding {variable.get()} at location {txt_location.get()} for machine ID {txt_machineID.get()}"))
-    insertButton.place(x=15, y=185)
+    txt_employeeMessage.place(x=155, y=145) 
+    employeeMessage = Label(window4, text="Employee name")
+    employeeMessage.place(x=10, y=145)  
+
+    InsertButton = Button(window4, text="Contact Employee",command=lambda: messagebox.showinfo("Message Sent"f"Message sent to {txt_employeeMessage.get()} regarding {variable.get()}at location {txt_location.get()} for machine ID {txt_machineID.get()}"))
+    InsertButton.place(x=15, y=185)
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
     MenuButton.place(x=150, y=250)
-
 
 
 def showmenu():
