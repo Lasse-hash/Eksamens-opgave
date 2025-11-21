@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 from dotenv import dotenv_values
 import mysql.connector
 from datetime import datetime
@@ -7,6 +8,8 @@ from datetime import datetime
 window = Tk()
 
 window.geometry("350x150")
+
+global tree
 
 config = dotenv_values(r".env")
 
@@ -40,6 +43,15 @@ def menuwidgets():
     KontaktmedarbejderButton.place(x=120, y=80)
 
 def menu2Widgets():
+    tree = ttk.Treeview(window3, columns=("ID", "Machine ID", "Item Name", "Stock"), show="headings")
+    tree.heading("ID", text="ID")
+    tree.heading("Machine ID", text="Machine ID")
+    tree.heading("Item Name", text="Item Name")
+    tree.heading("Stock", text="Stock")
+    tree.column("ID", width=50, anchor="center")
+    tree.column("Stock", width=60)
+    tree.place(x=350, y=30, width=500, height=200)
+
     txt_machineID = Entry(window2, width=25)
     txt_machineID.place(x=155, y=35)
     machineID = Label(window2, text="Enter vending machine ID")
@@ -62,7 +74,7 @@ def menu2Widgets():
     InsertButton = Button(window2, text="Insert item", command=lambda: insertItem(txt_Item, txt_machineID, txt_itemAmount))
     InsertButton.place(x=15, y=165)
 
-    GetButton = Button(window2, text="Get ID", command=getValues)
+    GetButton = Button(window2, text="Get ID", command=lambda: getitem(txt_ItemID, txt_machineID, txt_Item))
     GetButton.place(x=90, y=165)
 
     DeleteButton = Button(window2, text="Delete", command=lambda: deleteItem(txt_Item, txt_machineID))
@@ -74,10 +86,19 @@ def menu2Widgets():
     MenuButton = Button(window2, text="Menu", command=showmenu)
     MenuButton.place(x=150, y=255)
 
-    Gettxt = Text(window2, width=50)
-    Gettxt.place(x=350, y=30)
+    #Gettxt = Text(window2, width=50)
+    #Gettxt.place(x=350, y=30)
 
 def menu3Widgets():
+
+    # Treeview for displaying results
+    tree = ttk.Treeview(window3, columns=("ID", "Location", "Status"), show="headings")
+    tree.heading("ID", text="ID")
+    tree.heading("Location", text="Location")
+    tree.heading("Status", text="Status")
+    tree.column("ID", width=60, anchor="center")
+    tree.place(x=350, y=30, width=450, height=200)
+
     txt_machineID = Entry(window3, width=25)
     txt_machineID.place(x=155, y=35)
     machineID = Label(window3, text="Enter vending machine ID")
@@ -98,7 +119,7 @@ def menu3Widgets():
     InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_machineID, txt_location, machineStatusVar))
     InsertButton.place(x=25, y=145)
 
-    GetButton = Button(window3, text="Get Machine", command=lambda: getValues(txt_machineID, txt_location, machineStatusVar, Gettxt))
+    GetButton = Button(window3, text="Get Machine", command=lambda: getValues(txt_machineID, txt_location, machineStatusVar))
     GetButton.place(x=25, y=185)
 
     DeleteButton = Button(
@@ -115,8 +136,8 @@ def menu3Widgets():
     MenuButton = Button(window3, text="Menu", command=showmenu)
     MenuButton.place(x=150, y=250)
 
-    Gettxt = Text(window3, width=50)
-    Gettxt.place(x=350, y=30)
+    #Gettxt = Text(window3, width=50)
+    #Gettxt.place(x=350, y=30)
 
 def menu4Widgets():
     txt_location = Entry(window4, width=25)
@@ -256,7 +277,7 @@ def insertItem(itemID, machineID, amount):
 #endregion
 
 #region Get Funtion
-def getValues(machineid, machinelocation, status, Gettxt):
+def getValues(machineid, machinelocation, status):
     machineID = machineid.get()
     machineLocation = machinelocation.get()
     machinestatus = status.get()
@@ -284,15 +305,60 @@ def getValues(machineid, machinelocation, status, Gettxt):
             query += " WHERE " + " AND ".join(condition)
 
         cursorObjeckt.execute(query, tuple(params))
+        
+        for item in tree.get_children():
+            tree.delete(item)
 
         rows = cursorObjeckt.fetchall()
-        Gettxt.delete("1.0", "end")
-        if rows:
-            row = rows[0]
-            Gettxt.insert("end", f"Machine location: {row[1]} \n\n")
-            Gettxt.insert("end", f"Machine status: {row[2]} \n\n")
-        else:
-            Gettxt.insert("end", "No matching machine found.")
+        
+        
+        for row in rows:
+            tree.insert("", "end", values=row)
+        
+        cursorObjeckt.close()
+        conn.close()
+
+def getitem(itemID, machineID, itemName):
+    itemid = itemID.get()
+    machineid = machineID.get
+    itemname = itemName.get()
+
+    if itemid == "" and machineid == "" and itemname == "":
+        messagebox.showinfo("Get Status", "Atleast one field required to get values")
+    else:
+        conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
+        cursorObjeckt = conn.cursor()
+
+        params = []
+        conditions = []
+
+        if itemid.strip():
+            conditions.append("id=%s")
+            params.append(itemid)
+        if machineid.strip():
+            conditions.append("vending_machine_id=%s")
+            params.append(machineid)
+        if itemname.strip():
+            conditions.append("item_name=%s")
+            params.append(itemname)
+        
+        query = "SELECT * FROM items"
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        
+        cursorObjeckt.execute(query, tuple(params))
+
+        for item in tree.get_children():
+            tree.delete(item)
+
+        rows = cursorObjeckt.fetchall()
+        
+        for row in rows:
+            tree.insert("", "end", values=row)
+        
+        cursorObjeckt.close()
+        conn.close()
+
 
 #endregion
 
