@@ -9,7 +9,6 @@ window = Tk()
 
 window.geometry("350x150")
 
-global tree
 
 config = dotenv_values(r".env")
 
@@ -27,6 +26,10 @@ window4 = Toplevel(window)
 window4.geometry("940x800")
 window4.withdraw()
 
+tree = ttk.Treeview(window2, columns=("ID", "Machine ID", "Item Name", "Stock"), show="headings")
+
+tree2 = ttk.Treeview(window3, columns=("ID", "Location", "Status"), show="headings")
+
 machineStatus = ["FULL","HALF", "LOW", "EMPTY", "OFFLINE", "NONE"]
 
 options = ["NONE", "Refill machine", "Report issue", "Request maintenance"]
@@ -43,14 +46,15 @@ def menuwidgets():
     KontaktmedarbejderButton.place(x=120, y=80)
 
 def menu2Widgets():
-    tree = ttk.Treeview(window3, columns=("ID", "Machine ID", "Item Name", "Stock"), show="headings")
     tree.heading("ID", text="ID")
     tree.heading("Machine ID", text="Machine ID")
     tree.heading("Item Name", text="Item Name")
     tree.heading("Stock", text="Stock")
     tree.column("ID", width=50, anchor="center")
+    tree.column("Machine ID", width=80)
+    tree.column("Item Name", width=200)
     tree.column("Stock", width=60)
-    tree.place(x=350, y=30, width=500, height=200)
+    tree.place(x=350, y=30, width=400, height=200)
 
     txt_machineID = Entry(window2, width=25)
     txt_machineID.place(x=155, y=35)
@@ -91,18 +95,14 @@ def menu2Widgets():
     MenuButton = Button(window2, text="Menu", command=showmenu)
     MenuButton.place(x=10, y=305)
 
-    #Gettxt = Text(window2, width=50)
-    #Gettxt.place(x=350, y=30)
-
 def menu3Widgets():
-
-    # Treeview for displaying results
-    tree = ttk.Treeview(window3, columns=("ID", "Location", "Status"), show="headings")
-    tree.heading("ID", text="ID")
-    tree.heading("Location", text="Location")
-    tree.heading("Status", text="Status")
-    tree.column("ID", width=60, anchor="center")
-    tree.place(x=350, y=30, width=450, height=200)
+    tree2.heading("ID", text="ID")
+    tree2.heading("Location", text="Location")
+    tree2.heading("Status", text="Status")
+    tree2.column("ID", width=60, anchor="center")
+    tree2.column("Location", width=150)
+    tree2.column("Status", width=80)
+    tree2.place(x=350, y=30, width=300, height=200)
 
     txt_machineID = Entry(window3, width=25)
     txt_machineID.place(x=80, y=35)
@@ -141,8 +141,6 @@ def menu3Widgets():
     MenuButton = Button(window3, text="Menu", command=showmenu)
     MenuButton.place(x=10, y=275)   
 
-    #Gettxt = Text(window3, width=50)
-    #Gettxt.place(x=350, y=30)
 
 def menu4Widgets():
     txt_location = Entry(window4, width=25)
@@ -310,21 +308,21 @@ def getValues(machineid, machinelocation, status):
 
         cursorObjeckt.execute(query, tuple(params))
         
-        for item in tree.get_children():
-            tree.delete(item)
+        for item in tree2.get_children():
+            tree2.delete(item)
 
         rows = cursorObjeckt.fetchall()
         
         
         for row in rows:
-            tree.insert("", "end", values=row)
+            tree2.insert("", "end", values=row)
         
         cursorObjeckt.close()
         conn.close()
 
 def getitem(itemID, machineID, itemName):
     itemid = itemID.get()
-    machineid = machineID.get
+    machineid = machineID.get()
     itemname = itemName.get()
 
     if itemid == "" and machineid == "" and itemname == "":
@@ -338,13 +336,13 @@ def getitem(itemID, machineID, itemName):
 
         if itemid.strip():
             conditions.append("id=%s")
-            params.append(itemid)
+            params.append(itemid.strip())
         if machineid.strip():
             conditions.append("vending_machine_id=%s")
-            params.append(machineid)
+            params.append(machineid.strip())
         if itemname.strip():
             conditions.append("item_name=%s")
-            params.append(itemname)
+            params.append(itemname.strip())
         
         query = "SELECT * FROM items"
         if conditions:
