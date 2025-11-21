@@ -46,74 +46,79 @@ def menu2Widgets():
     machineID.place(x=10, y=35)
 
     txt_Item = Entry(window2, width=25)
-    txt_Item.place(x=155, y=75)
+    txt_Item.place(x=155, y=65)
     Item = Label(window2, text="Enter item")
-    Item.place(x=10, y=75)
+    Item.place(x=10, y=65)
 
     txt_itemAmount = Entry(window2, width=25)
-    txt_itemAmount.place(x=155, y=105)
+    txt_itemAmount.place(x=155, y=95)
     itemAmount = Label(window2, text="Enter amount of item")
-    itemAmount.place(x=10, y=105)
+    itemAmount.place(x=10, y=95)
+
+    txt_ItemID = Entry(window2, width=25)
+    txt_ItemID.place(x=155, y=125)
+    ItemID = Label(window2, text="Enter item ID (for delete)")
+    ItemID.place(x=10, y=125)
 
 
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
 
     InsertButton = Button(window2, text="Insert item", command=lambda: insertItem(txt_Item, txt_machineID, txt_itemAmount))
-    InsertButton.place(x=15, y=165)
+    InsertButton.place(x=10, y=165)
 
     GetButton = Button(window2, text="Get ID", command=getValues)
-    GetButton.place(x=90, y=165)
+    GetButton.place(x=10, y=195)
 
-    DeleteButton = Button(window2, text="Delete", command=lambda: deleteItem(txt_Item, txt_machineID))
-    DeleteButton.place(x=140, y=165)
+    DeleteButton = Button(window2, text="Delete by item ID", command=lambda: deleteItem(txt_ItemID))
+    DeleteButton.place(x=10, y=225)
 
     UpdateButton = Button(window2, text="Update", command=lambda: updateValues(txt_machineID, None, None, txt_Item, txt_itemAmount))
-    UpdateButton.place(x=195, y=165)
+    UpdateButton.place(x=10, y=255)
 
     MenuButton = Button(window2, text="Menu", command=showmenu)
-    MenuButton.place(x=150, y=255)
+    MenuButton.place(x=10, y=305)
 
     Gettxt = Text(window2, width=50)
     Gettxt.place(x=350, y=30)
 
 def menu3Widgets():
     txt_machineID = Entry(window3, width=25)
-    txt_machineID.place(x=155, y=35)
-    machineID = Label(window3, text="Enter vending machine ID")
+    txt_machineID.place(x=80, y=35)
+    machineID = Label(window3, text="Enter ID")
     machineID.place(x=10, y=35)
 
     txt_location = Entry(window3, width=25)
-    txt_location.place(x=155, y=75)
+    txt_location.place(x=80, y=65)
     location = Label(window3, text="Enter City")
-    location.place(x=10, y=75)
-
+    location.place(x=10, y=65)
+    
     machineStatusVar = StringVar(window3)
     machineStatusVar.set(machineStatus[0])
     machineStatusMenu = OptionMenu(window3, machineStatusVar, *machineStatus)
-    machineStatusMenu.place(x=155, y=105)
+    machineStatusMenu.place(x=155, y=95)
     status = Label(window3, text="Enter the machine status")
-    status.place(x=10, y=105)
+    status.place(x=10, y=95)
 
     InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_machineID, txt_location, machineStatusVar))
-    InsertButton.place(x=25, y=145)
+    InsertButton.place(x=10, y=135)
 
     GetButton = Button(window3, text="Get Machine", command=lambda: getValues(txt_machineID, txt_location, machineStatusVar, Gettxt))
-    GetButton.place(x=25, y=185)
+    GetButton.place(x=10, y=165)
 
     DeleteButton = Button(
     window3, 
-    text="Delete Machine", 
+    text="Remove Machine", 
     command=lambda: delete_Vending(txt_machineID)
 )
 
-    DeleteButton.place(x=140, y=145)
+    DeleteButton.place(x=10, y=195)
 
     UpdateButton = Button(window3, text="Update Information", command=lambda: updateValues(txt_machineID, txt_location, machineStatusVar, None, None))
-    UpdateButton.place(x=140, y=185)
+    UpdateButton.place(x=10, y=225)
 
     MenuButton = Button(window3, text="Menu", command=showmenu)
-    MenuButton.place(x=150, y=250)
+    MenuButton.place(x=10, y=275)   
 
     Gettxt = Text(window3, width=50)
     Gettxt.place(x=350, y=30)
@@ -250,7 +255,6 @@ def insertItem(itemID, machineID, amount):
         messagebox.showerror("Insert Error", "Amount must be a number")
         return
     
-    messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
 
 
 #endregion
@@ -402,12 +406,16 @@ def delete_Vending(txt_machineID):
         cursor.close()
         conn.close()
 
-def deleteItem(itemID, machineID):
-    item = itemID.get().strip()
-    machine_id = machineID.get().strip()
+def deleteItem(itemIDField):
+    item_id = itemIDField.get().strip()
     
-    if not item or not machine_id:
-        return messagebox.showerror("Delete Error", "Please enter both item name and machine ID")
+    if not item_id:
+        return messagebox.showerror("Delete Error", "Please enter an item ID")
+    
+    try:
+        item_id = int(item_id)
+    except ValueError:
+        return messagebox.showerror("Delete Error", "Item ID must be a number")
     
     try:
         conn = mysql.connector.connect(
@@ -418,25 +426,26 @@ def deleteItem(itemID, machineID):
         )
         cursor = conn.cursor()
 
-        # Tjek om item findes i den specifikke maskine og find antal
-        cursor.execute("SELECT COUNT(*) FROM items WHERE item_name=%s AND vending_machine_id=%s", (item, machine_id))
-        count = cursor.fetchone()[0]
+        # Hent item info før sletning
+        cursor.execute("SELECT item_name, vending_machine_id FROM items WHERE id=%s", (item_id,))
+        result = cursor.fetchone()
         
-        if count == 0:
-            return messagebox.showerror("Delete Error", f"Item '{item}' does not exist in machine {machine_id}.")
+        if not result:
+            return messagebox.showerror("Delete Error", f"Item with ID {item_id} does not exist.")
         
-        if not messagebox.askyesno("Confirm Delete", f"Delete all {count} '{item}' entries from machine {machine_id}?"):
+        item_name, machine_id = result
+        
+        if not messagebox.askyesno("Confirm Delete", f"Delete '{item_name}' (ID: {item_id}) from machine {machine_id}?"):
             return
         
-        # Slet alle items med det navn fra den specifikke maskine
-        cursor.execute("DELETE FROM items WHERE item_name=%s AND vending_machine_id=%s", (item, machine_id))
+        # Slet den specifikke item baseret på ID
+        cursor.execute("DELETE FROM items WHERE id=%s", (item_id,))
         conn.commit()
 
-        messagebox.showinfo("Delete Status", f"Deleted {count} '{item}' item(s) successfully from machine {machine_id}")
+        messagebox.showinfo("Delete Status", f"Item '{item_name}' (ID: {item_id}) deleted successfully")
         
-        # Ryd felterne
-        itemID.delete(0, END)
-        machineID.delete(0, END)
+        # Ryd feltet
+        itemIDField.delete(0, END)
 
     except mysql.connector.Error as err:
         messagebox.showerror("Database Error", f"Error: {err}")
