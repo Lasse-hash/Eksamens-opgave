@@ -383,6 +383,12 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
 
+        allowed_columns = {
+            "item_name": "item_name=%s",
+            "quantity": "quantity=%s",
+            "status": "status=%s",
+            "location": "location=%s"
+        }
         
         machineLocation = machinelocation.get() if machinelocation else None
         machinestatus = status.get() if status else None
@@ -397,30 +403,33 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
             sets = []
             prams = []
             if machinelocation:
-                sets.append("location=%s")
+                sets.append(allowed_columns["location"])
                 prams.append(machineLocation)
             if status:
-                sets.append("status=%s")
+                sets.append(allowed_columns["status"])
                 prams.append(machinestatus)
 
             prams.append(machineID)
+            query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE vending_machines_id=%s"
 
-            cursorObjekt.execute(f"UPDATE vending_machines SET {', '.join(sets)} WHERE id=%s", tuple(prams))
+            cursorObjekt.execute(query, tuple(prams))
             messagebox.showinfo("Update Status", "Updated items")
 
         if machineitem or itemamount is not None:
             sets = []
             prams = []
             if machineitem:
-                sets.append("item_name=%s")
+                sets.append(allowed_columns["item_name"])
                 prams.append(machineItem)
             if itemamount is not None:
-                sets.append("quantity=%s")
+                sets.append(allowed_columns["quantity"])
                 prams.append(itemAmount)
 
-            prams.append(machineID) 
+            prams.append(machineID)
 
-            cursorObjekt.execute(f"UPDATE items SET {', '.join(sets)} WHERE vending_machine_id=%s", tuple(prams))
+            query = "UPDATE items SET " + ", ".join(sets) + " WHERE vending_machines_id=%s"
+
+            cursorObjekt.execute(query, tuple(prams))
             messagebox.showinfo("Update Status", "Updated items")
 
         conn.commit()
