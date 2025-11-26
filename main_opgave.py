@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 from dotenv import dotenv_values
 import mysql.connector
 from datetime import datetime
@@ -7,6 +8,7 @@ from datetime import datetime
 window = Tk()
 
 window.geometry("350x150")
+
 
 config = dotenv_values(r".env")
 
@@ -24,6 +26,10 @@ window4 = Toplevel(window)
 window4.geometry("940x800")
 window4.withdraw()
 
+tree = ttk.Treeview(window2, columns=("ID", "Machine ID", "Item Name", "Stock"), show="headings")
+
+tree2 = ttk.Treeview(window3, columns=("ID", "Location", "Status"), show="headings")
+
 machineStatus = ["FULL","HALF", "LOW", "EMPTY", "OFFLINE", "NONE"]
 
 options = ["NONE", "Refill machine", "Report issue", "Request maintenance"]
@@ -40,83 +46,101 @@ def menuwidgets():
     KontaktmedarbejderButton.place(x=120, y=80)
 
 def menu2Widgets():
+    tree.heading("ID", text="ID")
+    tree.heading("Machine ID", text="Machine ID")
+    tree.heading("Item Name", text="Item Name")
+    tree.heading("Stock", text="Stock")
+    tree.column("ID", width=50, anchor="center")
+    tree.column("Machine ID", width=80)
+    tree.column("Item Name", width=200)
+    tree.column("Stock", width=60)
+    tree.place(x=350, y=30, width=400, height=200)
+
     txt_machineID = Entry(window2, width=25)
     txt_machineID.place(x=155, y=35)
     machineID = Label(window2, text="Enter vending machine ID")
     machineID.place(x=10, y=35)
 
     txt_Item = Entry(window2, width=25)
-    txt_Item.place(x=155, y=75)
+    txt_Item.place(x=155, y=65)
     Item = Label(window2, text="Enter item")
-    Item.place(x=10, y=75)
+    Item.place(x=10, y=65)
 
     txt_itemAmount = Entry(window2, width=25)
-    txt_itemAmount.place(x=155, y=105)
+    txt_itemAmount.place(x=155, y=95)
     itemAmount = Label(window2, text="Enter amount of item")
-    itemAmount.place(x=10, y=105)
+    itemAmount.place(x=10, y=95)
+
+    txt_ItemID = Entry(window2, width=25)
+    txt_ItemID.place(x=155, y=125)
+    ItemID = Label(window2, text="Enter item ID (for delete)")
+    ItemID.place(x=10, y=125)
 
 
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
 
     InsertButton = Button(window2, text="Insert item", command=lambda: insertItem(txt_Item, txt_machineID, txt_itemAmount))
-    InsertButton.place(x=15, y=165)
+    InsertButton.place(x=10, y=165)
 
-    GetButton = Button(window2, text="Get ID", command=getValues)
+    GetButton = Button(window2, text="Get ID", command=lambda: getitem(txt_ItemID, txt_machineID, txt_Item))
     GetButton.place(x=90, y=165)
 
-    DeleteButton = Button(window2, text="Delete", command=lambda: deleteItem(txt_Item))
-    DeleteButton.place(x=140, y=165)
+    DeleteButton = Button(window2, text="Delete by item ID", command=lambda: deleteItem(txt_ItemID))
+    DeleteButton.place(x=10, y=225)
 
     UpdateButton = Button(window2, text="Update", command=lambda: updateValues(txt_machineID, None, None, txt_Item, txt_itemAmount))
-    UpdateButton.place(x=195, y=165)
+    UpdateButton.place(x=10, y=255)
 
     MenuButton = Button(window2, text="Menu", command=showmenu)
-    MenuButton.place(x=150, y=255)
-
-    Gettxt = Text(window2, width=50)
-    Gettxt.place(x=350, y=30)
+    MenuButton.place(x=10, y=305)
 
 def menu3Widgets():
+    tree2.heading("ID", text="ID")
+    tree2.heading("Location", text="Location")
+    tree2.heading("Status", text="Status")
+    tree2.column("ID", width=60, anchor="center")
+    tree2.column("Location", width=150)
+    tree2.column("Status", width=80)
+    tree2.place(x=350, y=30, width=300, height=200)
+
     txt_machineID = Entry(window3, width=25)
-    txt_machineID.place(x=155, y=35)
-    machineID = Label(window3, text="Enter vending machine ID")
+    txt_machineID.place(x=80, y=35)
+    machineID = Label(window3, text="Enter ID")
     machineID.place(x=10, y=35)
 
     txt_location = Entry(window3, width=25)
-    txt_location.place(x=155, y=75)
+    txt_location.place(x=80, y=65)
     location = Label(window3, text="Enter City")
-    location.place(x=10, y=75)
-
+    location.place(x=10, y=65)
+    
     machineStatusVar = StringVar(window3)
     machineStatusVar.set(machineStatus[0])
     machineStatusMenu = OptionMenu(window3, machineStatusVar, *machineStatus)
-    machineStatusMenu.place(x=155, y=105)
+    machineStatusMenu.place(x=155, y=95)
     status = Label(window3, text="Enter the machine status")
-    status.place(x=10, y=105)
+    status.place(x=10, y=95)
 
     InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_machineID, txt_location, machineStatusVar))
-    InsertButton.place(x=25, y=145)
+    InsertButton.place(x=10, y=135)
 
-    GetButton = Button(window3, text="Get Machine", command=lambda: getValues(txt_machineID, txt_location, machineStatusVar, Gettxt))
+    GetButton = Button(window3, text="Get Machine", command=lambda: getValues(txt_machineID, txt_location, machineStatusVar))
     GetButton.place(x=25, y=185)
 
     DeleteButton = Button(
     window3, 
-    text="Delete Machine", 
+    text="Remove Machine", 
     command=lambda: delete_Vending(txt_machineID)
 )
 
-    DeleteButton.place(x=140, y=145)
+    DeleteButton.place(x=10, y=195)
 
     UpdateButton = Button(window3, text="Update Information", command=lambda: updateValues(txt_machineID, txt_location, machineStatusVar, None, None))
-    UpdateButton.place(x=140, y=185)
+    UpdateButton.place(x=10, y=225)
 
     MenuButton = Button(window3, text="Menu", command=showmenu)
-    MenuButton.place(x=150, y=250)
+    MenuButton.place(x=10, y=275)   
 
-    Gettxt = Text(window3, width=50)
-    Gettxt.place(x=350, y=30)
 
 def menu4Widgets():
     txt_location = Entry(window4, width=25)
@@ -250,13 +274,12 @@ def insertItem(itemID, machineID, amount):
         messagebox.showerror("Insert Error", "Amount must be a number")
         return
     
-    messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
 
 
 #endregion
 
 #region Get Funtion
-def getValues(machineid, machinelocation, status, Gettxt):
+def getValues(machineid, machinelocation, status):
     machineID = machineid.get()
     machineLocation = machinelocation.get()
     machinestatus = status.get()
@@ -284,15 +307,60 @@ def getValues(machineid, machinelocation, status, Gettxt):
             query += " WHERE " + " AND ".join(condition)
 
         cursorObjeckt.execute(query, tuple(params))
+        
+        for item in tree2.get_children():
+            tree2.delete(item)
 
         rows = cursorObjeckt.fetchall()
-        Gettxt.delete("1.0", "end")
-        if rows:
-            row = rows[0]
-            Gettxt.insert("end", f"Machine location: {row[1]} \n\n")
-            Gettxt.insert("end", f"Machine status: {row[2]} \n\n")
-        else:
-            Gettxt.insert("end", "No matching machine found.")
+        
+        
+        for row in rows:
+            tree2.insert("", "end", values=row)
+        
+        cursorObjeckt.close()
+        conn.close()
+
+def getitem(itemID, machineID, itemName):
+    itemid = itemID.get()
+    machineid = machineID.get()
+    itemname = itemName.get()
+
+    if itemid == "" and machineid == "" and itemname == "":
+        messagebox.showinfo("Get Status", "Atleast one field required to get values")
+    else:
+        conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
+        cursorObjeckt = conn.cursor()
+
+        params = []
+        conditions = []
+
+        if itemid.strip():
+            conditions.append("id=%s")
+            params.append(itemid.strip())
+        if machineid.strip():
+            conditions.append("vending_machine_id=%s")
+            params.append(machineid.strip())
+        if itemname.strip():
+            conditions.append("item_name=%s")
+            params.append(itemname.strip())
+        
+        query = "SELECT * FROM items"
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        
+        cursorObjeckt.execute(query, tuple(params))
+
+        for item in tree.get_children():
+            tree.delete(item)
+
+        rows = cursorObjeckt.fetchall()
+        
+        for row in rows:
+            tree.insert("", "end", values=row)
+        
+        cursorObjeckt.close()
+        conn.close()
+
 
 #endregion
 
@@ -402,10 +470,16 @@ def delete_Vending(txt_machineID):
         cursor.close()
         conn.close()
 
-def deleteItem(itemID):
-    item = itemID.get().strip()
-    if not item:
+def deleteItem(itemIDField):
+    item_id = itemIDField.get().strip()
+    
+    if not item_id:
         return messagebox.showerror("Delete Error", "Please enter an item ID")
+    
+    try:
+        item_id = int(item_id)
+    except ValueError:
+        return messagebox.showerror("Delete Error", "Item ID must be a number")
     
     try:
         conn = mysql.connector.connect(
@@ -416,17 +490,26 @@ def deleteItem(itemID):
         )
         cursor = conn.cursor()
 
-        cursor.execute("SELECT id FROM items WHERE item_name=%s", (item,))
-        if not cursor.fetchone():
-            return messagebox.showerror("Delete Error", f"Item {item} does not exist.")
+        # Hent item info før sletning
+        cursor.execute("SELECT item_name, vending_machine_id FROM items WHERE id=%s", (item_id,))
+        result = cursor.fetchone()
         
-        if not messagebox.askyesno("Confirm Delete", f"Delete item {item}?"):
+        if not result:
+            return messagebox.showerror("Delete Error", f"Item with ID {item_id} does not exist.")
+        
+        item_name, machine_id = result
+        
+        if not messagebox.askyesno("Confirm Delete", f"Delete '{item_name}' (ID: {item_id}) from machine {machine_id}?"):
             return
         
-        cursor.execute("DELETE FROM items WHERE item_name=%s", (item,))
+        # Slet den specifikke item baseret på ID
+        cursor.execute("DELETE FROM items WHERE id=%s", (item_id,))
         conn.commit()
 
-        messagebox.showinfo("Delete Status", f"Item {item} deleted successfully")
+        messagebox.showinfo("Delete Status", f"Item '{item_name}' (ID: {item_id}) deleted successfully")
+        
+        # Ryd feltet
+        itemIDField.delete(0, END)
 
     except mysql.connector.Error as err:
         messagebox.showerror("Database Error", f"Error: {err}")
