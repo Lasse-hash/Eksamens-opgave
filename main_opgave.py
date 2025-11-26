@@ -83,7 +83,7 @@ def menu2Widgets():
     InsertButton.place(x=10, y=165)
 
     GetButton = Button(window2, text="Get ID", command=lambda: getitem(txt_ItemID, txt_machineID, txt_Item))
-    GetButton.place(x=90, y=165)
+    GetButton.place(x=10, y=195)
 
     DeleteButton = Button(window2, text="Delete by item ID", command=lambda: deleteItem(txt_ItemID))
     DeleteButton.place(x=10, y=225)
@@ -179,7 +179,7 @@ def menu4Widgets():
     InsertButton.place(x=15, y=185)
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
-    MenuButton.place(x=120, y=185)
+    MenuButton.place(x=15, y=225)
 
 
 
@@ -366,9 +366,29 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
     if machineID == "":
         messagebox.showinfo("Update Status", "Failed: Must put machine id")
     else:
+        try:
+            machineidTry = machineid.get()
+            machineidTry = int(machineidTry)
+            
+        except ValueError:
+            messagebox.showinfo("Update Status", "Failed: ID must be a number")
+            return
+        try:
+            itemamountTry = itemamount.get()
+            itemamountTry = int(itemamountTry)
+        except ValueError:
+            messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+            return
+        
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
 
+        allowed_columns = {
+            "item_name": "item_name=%s",
+            "quantity": "quantity=%s",
+            "status": "status=%s",
+            "location": "location=%s"
+        }
         
         machineLocation = machinelocation.get() if machinelocation else None
         machinestatus = status.get() if status else None
@@ -383,26 +403,33 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
             sets = []
             prams = []
             if machinelocation:
-                sets.append("location=%s")
+                sets.append(allowed_columns["location"])
                 prams.append(machineLocation)
             if status:
-                sets.append("status=%s")
+                sets.append(allowed_columns["status"])
                 prams.append(machinestatus)
+
             prams.append(machineID)
-            cursorObjekt.execute(f"UPDATE vending_machines SET {', '.join(sets)} WHERE id=%s", tuple(prams))
+            query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE vending_machines_id=%s"
+
+            cursorObjekt.execute(query, tuple(prams))
             messagebox.showinfo("Update Status", "Updated items")
 
         if machineitem or itemamount is not None:
             sets = []
             prams = []
             if machineitem:
-                sets.append("item_name=%s")
+                sets.append(allowed_columns["item_name"])
                 prams.append(machineItem)
             if itemamount is not None:
-                sets.append("quantity=%s")
+                sets.append(allowed_columns["quantity"])
                 prams.append(itemAmount)
-            prams.append(machineID)  # assuming vending_machine_id = machineID
-            cursorObjekt.execute(f"UPDATE items SET {', '.join(sets)} WHERE vending_machine_id=%s", tuple(prams))
+
+            prams.append(machineID)
+
+            query = "UPDATE items SET " + ", ".join(sets) + " WHERE vending_machines_id=%s"
+
+            cursorObjekt.execute(query, tuple(prams))
             messagebox.showinfo("Update Status", "Updated items")
 
         conn.commit()
