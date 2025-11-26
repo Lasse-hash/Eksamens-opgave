@@ -124,7 +124,7 @@ def menu3Widgets():
     InsertButton.place(x=10, y=135)
 
     GetButton = Button(window3, text="Get Machine", command=lambda: getValues(txt_machineID, txt_location, machineStatusVar))
-    GetButton.place(x=25, y=185)
+    GetButton.place(x=10, y=165)
 
     DeleteButton = Button(
     window3, 
