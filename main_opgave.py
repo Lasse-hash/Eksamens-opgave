@@ -3,7 +3,6 @@ from tkinter import messagebox
 from tkinter import ttk
 from dotenv import dotenv_values
 import mysql.connector
-from datetime import datetime
 
 window = Tk()
 
@@ -130,8 +129,7 @@ def menu3Widgets():
     DeleteButton = Button(
     window3, 
     text="Remove Machine", 
-    command=lambda: delete_Vending(txt_machineID)
-)
+    command=lambda: delete_Vending(txt_machineID))
 
     DeleteButton.place(x=10, y=195)
 
@@ -194,16 +192,19 @@ def showmenu():
 def showmenu2():
     window.withdraw()
     window3.withdraw()
+    window4.withdraw()
     window2.deiconify()
 
 def showmenu3():
     window.withdraw()
     window2.withdraw()
+    window4.withdraw()
     window3.deiconify()
 
 def showmenu4():
     window.withdraw()
     window2.withdraw()
+    window4.withdraw()
     window4.deiconify()
 #endregion
 
@@ -215,11 +216,9 @@ def insertMachine(machineID, machineLocation, status):
     if machinelocation == "" or machineid == "" or Status == machineStatus[5]:
         messagebox.showinfo("insert status", "all fields required")
     else: 
-        now = datetime.now()
-        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObject = conn.cursor()
-        cursorObject.execute("INSERT INTO vending_machines (location, status, last_refill) VALUES (%s, %s, %s)", (machinelocation, Status, timestamp))
+        cursorObject.execute("INSERT INTO vending_machines (location, status, last_refill) VALUES (%s, %s)", (machinelocation, Status))
         conn.commit()
         cursorObject.close()
         messagebox.showinfo("insert status", "inserted machine into database")
@@ -273,9 +272,6 @@ def insertItem(itemID, machineID, amount):
     except ValueError:
         messagebox.showerror("Insert Error", "Amount must be a number")
         return
-    
-
-
 #endregion
 
 #region Get Funtion
@@ -425,12 +421,10 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
         messagebox.showinfo("Update Status", "Updated items")
 
     conn.commit()
+    cursor.close()
     conn.close()
-
-
-
-        
 #endregion
+
 
 #region Delete Funtion
 def delete_Vending(txt_machineID):
@@ -522,8 +516,7 @@ def deleteItem(itemIDField):
 
 #region Main
 def main():
-
-    
+ 
     menu2Widgets()
     menu3Widgets()
     menu4Widgets()
