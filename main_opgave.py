@@ -29,7 +29,7 @@ tree = ttk.Treeview(window2, columns=("ID", "Machine ID", "Item Name", "Stock"),
 
 tree2 = ttk.Treeview(window3, columns=("ID", "Location", "Status"), show="headings")
 
-machineStatus = ["FULL","HALF", "LOW", "EMPTY", "OFFLINE", "NONE"]
+machineStatus = ["NONE", "FULL","HALF", "LOW", "EMPTY", "OFFLINE"]
 
 options = ["NONE", "Refill machine", "Report issue", "Request maintenance"]
 
@@ -210,15 +210,15 @@ def showmenu4():
 
 #region Insert Funtion
 def insertMachine(machineID, machineLocation, status):
-    machineid = machineID.get()
-    machinelocation = machineLocation.get()
-    Status = status.get()
+    machineid = machineID.get().strip()
+    machinelocation = machineLocation.get().strip()
+    Status = status.get().strip()
     if machinelocation == "" or machineid == "" or Status == machineStatus[5]:
-        messagebox.showinfo("insert status", "all fields required")
+        messagebox.showinfo("Insert Status", "location and status required")
     else: 
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObject = conn.cursor()
-        cursorObject.execute("INSERT INTO vending_machines (location, status, last_refill) VALUES (%s, %s)", (machinelocation, Status))
+        cursorObject.execute("INSERT INTO vending_machines (location, status) VALUES (%s, %s)", (machinelocation, Status))
         conn.commit()
         cursorObject.close()
         messagebox.showinfo("insert status", "inserted machine into database")
@@ -370,59 +370,44 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
         cursorObjekt = conn.cursor()
 
         
-        if machinelocation is not None:
-            machineLocation = machinelocation.get()
-        else:
-            machineItem = None
-       
-        if status is not None:
-            machinestatus = status.get()
-        else:
-            machinestatus = None
-        
-        if machineitem is not None:
-            machineItem = machineitem.get()
-        else:
-            machineItem = None
+        machineLocation = machinelocation.get() if machinelocation else None
+        machinestatus = status.get() if status else None
+        machineItem = machineitem.get() if machineitem else None
+        itemAmount = itemamount.get() if itemamount else None
 
-        if itemamount is not None:
-            itemAmuont = itemamount.get()
-        else:
-            itemAmuont = None
-
-        if not (machineLocation or machinestatus or machineItem or itemAmuont):
+        if not (machineLocation or machinestatus or machineItem or itemAmount):
             messagebox.showinfo("Fetch status", "Need atleast one line filled")
             return
 
-    if machinelocation or status:
-        sets = []
-        prams = []
-        if machinelocation:
-            sets.append("location=%s")
-            prams.append(machineLocation)
-        if status:
-            sets.append("status=%s")
-            prams.append(machinestatus)
-        prams.append(machineID)
-        cursorObjekt.execute(f"UPDATE vending_machines SET {', '.join(sets)} WHERE id=%s", tuple(prams))
-        messagebox.showinfo("Update Status", "Updated items")
+        if machinelocation or status:
+            sets = []
+            prams = []
+            if machinelocation:
+                sets.append("location=%s")
+                prams.append(machineLocation)
+            if status:
+                sets.append("status=%s")
+                prams.append(machinestatus)
+            prams.append(machineID)
+            cursorObjekt.execute(f"UPDATE vending_machines SET {', '.join(sets)} WHERE id=%s", tuple(prams))
+            messagebox.showinfo("Update Status", "Updated items")
 
-    if machineitem or itemamount is not None:
-        sets = []
-        prams = []
-        if machineitem:
-            sets.append("item_name=%s")
-            prams.append(machineItem)
-        if itemamount is not None:
-            sets.append("quantity=%s")
-            prams.append(itemAmuont)
-        prams.append(machineID)  # assuming vending_machine_id = machineID
-        cursorObjekt.execute(f"UPDATE items SET {', '.join(sets)} WHERE vending_machine_id=%s", tuple(prams))
-        messagebox.showinfo("Update Status", "Updated items")
+        if machineitem or itemamount is not None:
+            sets = []
+            prams = []
+            if machineitem:
+                sets.append("item_name=%s")
+                prams.append(machineItem)
+            if itemamount is not None:
+                sets.append("quantity=%s")
+                prams.append(itemAmount)
+            prams.append(machineID)  # assuming vending_machine_id = machineID
+            cursorObjekt.execute(f"UPDATE items SET {', '.join(sets)} WHERE vending_machine_id=%s", tuple(prams))
+            messagebox.showinfo("Update Status", "Updated items")
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        conn.commit()
+        cursor.close()
+        conn.close()
 #endregion
 
 
