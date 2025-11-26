@@ -366,6 +366,20 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
     if machineID == "":
         messagebox.showinfo("Update Status", "Failed: Must put machine id")
     else:
+        try:
+            machineidTry = machineid.get()
+            machineidTry = int(machineidTry)
+            
+        except ValueError:
+            messagebox.showinfo("Update Status", "Failed: ID must be a number")
+            return
+        try:
+            itemamountTry = itemamount.get()
+            itemamountTry = int(itemamountTry)
+        except ValueError:
+            messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+            return
+        
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
 
@@ -388,7 +402,9 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
             if status:
                 sets.append("status=%s")
                 prams.append(machinestatus)
+
             prams.append(machineID)
+
             cursorObjekt.execute(f"UPDATE vending_machines SET {', '.join(sets)} WHERE id=%s", tuple(prams))
             messagebox.showinfo("Update Status", "Updated items")
 
@@ -401,7 +417,9 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
             if itemamount is not None:
                 sets.append("quantity=%s")
                 prams.append(itemAmount)
-            prams.append(machineID)  # assuming vending_machine_id = machineID
+
+            prams.append(machineID) 
+
             cursorObjekt.execute(f"UPDATE items SET {', '.join(sets)} WHERE vending_machine_id=%s", tuple(prams))
             messagebox.showinfo("Update Status", "Updated items")
 
