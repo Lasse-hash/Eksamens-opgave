@@ -84,7 +84,7 @@ def menu2Widgets():
     InsertButton.place(x=10, y=165)
 
     GetButton = Button(window2, text="Get ID", command=lambda: getitem(txt_ItemID, txt_machineID, txt_Item))
-    GetButton.place(x=90, y=165)
+    GetButton.place(x=10, y=195)
 
     DeleteButton = Button(window2, text="Delete by item ID", command=lambda: deleteItem(txt_ItemID))
     DeleteButton.place(x=10, y=225)
@@ -125,7 +125,7 @@ def menu3Widgets():
     InsertButton.place(x=10, y=135)
 
     GetButton = Button(window3, text="Get Machine", command=lambda: getValues(txt_machineID, txt_location, machineStatusVar))
-    GetButton.place(x=25, y=185)
+    GetButton.place(x=10, y=165)
 
     DeleteButton = Button(
     window3, 
@@ -181,7 +181,7 @@ def menu4Widgets():
     InsertButton.place(x=15, y=185)
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
-    MenuButton.place(x=120, y=185)
+    MenuButton.place(x=15, y=225)
 
 
 
