@@ -366,6 +366,14 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
     if machineID == "":
         messagebox.showinfo("Update Status", "Failed: Must put machine id")
     else:
+        try:
+            machineidTry = int(machineid.get())
+        except ValueError:
+            messagebox.showinfo("Update Status", "Failed: ID must be a number")
+        try:
+            itemamountTry = int(itemamount.get())
+        except ValueError:
+            messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
 
