@@ -242,6 +242,7 @@ def insertItem(itemID, machineID, amount):
     Amount = amount.get().strip()
     if itemid == "" or machineid == "" or Amount == "":
         messagebox.showinfo("Insert Status", "All fields required")
+        return  # Rettetelse på kode fra fordi unittest: kræver return for at stoppe funktionen
     else:
         try:
             Amount = int(Amount)  # Make sure amount is a number
