@@ -383,12 +383,25 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
         except ValueError:
             messagebox.showinfo("Update Status", "Failed: ID must be a number")
             return
-        try:
-            itemamountTry = itemamount.get()
-            itemamountTry = int(itemamountTry)
-        except ValueError:
-            messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+        
+        # Check om der er felter at opdatere FØR database forbindelse
+        machineLocation = machinelocation.get() if machinelocation else None
+        machinestatus = status.get() if status else None
+        machineItem = machineitem.get() if machineitem else None
+        itemAmount = itemamount.get() if itemamount else None
+
+        if not (machineLocation or machinestatus or machineItem or itemAmount):
+            messagebox.showinfo("Fetch status", "Need atleast one line filled")
             return
+        
+        # Kun valider itemamount hvis den ikke er None
+        if itemamount is not None:
+            try:
+                itemamountTry = itemamount.get()
+                itemamountTry = int(itemamountTry)
+            except ValueError:
+                messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+                return
         
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
@@ -399,15 +412,6 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
             "status": "status=%s",
             "location": "location=%s"
         }
-        
-        machineLocation = machinelocation.get() if machinelocation else None
-        machinestatus = status.get() if status else None
-        machineItem = machineitem.get() if machineitem else None
-        itemAmount = itemamount.get() if itemamount else None
-
-        if not (machineLocation or machinestatus or machineItem or itemAmount):
-            messagebox.showinfo("Fetch status", "Need atleast one line filled")
-            return
 
         if machinelocation or status:
             sets = []

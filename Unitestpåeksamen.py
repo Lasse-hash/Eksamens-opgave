@@ -162,7 +162,42 @@ class TestUpdateFunctions(unittest.TestCase):
         # Verificer at database IKKE blev kaldt
         mock_connect.assert_not_called()
 
+    @patch('main_opgave.mysql.connector.connect')
+    @patch('main_opgave.messagebox')
+    def test_Update_no_fields_to_update(self, mock_messagebox, mock_connect):
+        # Mock Entry widget med kun machineID, ingen update felter
+        mock_machineID = Mock()
+        mock_machineID.get.return_value = "1"
+        
+        # Kald funktionen uden update felter
+        main_opgave.updateValues(mock_machineID, None, None, None, None)
+        
+        # Verificer at fejlbesked blev vist
+        mock_messagebox.showinfo.assert_called_once_with("Fetch status", "Need atleast one line filled")
+        # Verificer at database IKKE blev kaldt
+        mock_connect.assert_not_called()
 
+    @patch('main_opgave.mysql.connector.connect')
+    @patch('main_opgave.messagebox')
+    def test_Update_machine_location(self, mock_messagebox, mock_connect):
+        # Setup mock database
+        mock_conn = Mock()
+        mock_cursor = Mock()
+        mock_connect.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+        
+        # Mock Entry widgets
+        mock_machineID = Mock()
+        mock_machineID.get.return_value = "1"
+        mock_location = Mock()
+        mock_location.get.return_value = "Copenhagen"
+
+        # Kald funktionen
+        main_opgave.updateValues(mock_machineID, mock_location, None, None, None)
+
+        # Verificer at success besked blev vist
+        mock_messagebox.showinfo.assert_called_with("Update Status", "Updated items")
+        mock_conn.commit.assert_called_once()
 
 
 
