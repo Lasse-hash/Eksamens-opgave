@@ -6,6 +6,53 @@ import main_opgave
 class TestInsertFunctions(unittest.TestCase):
     
     @patch('main_opgave.mysql.connector.connect')
+    @patch('main_opgave.messagebox')   
+    def test_InsertMachine_valid_data(self, mock_messagebox, mock_connect):
+        # Setup mock database connection and cursor
+        mock_conn = Mock()
+        mock_cursor = Mock()
+        mock_connect.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+
+        # Mock Entry widgets for machineID, location and status
+        mock_machineID = Mock()
+        mock_machineID.get.return_value = "1"
+        mock_location = Mock()
+        mock_location.get.return_value = "Copenhagen"
+        mock_status = Mock()
+        mock_status.get.return_value = "FULL"
+
+        # Call the function with correct parameters
+        main_opgave.insertMachine(mock_machineID, mock_location, mock_status)
+
+        # Verify that the database insert was called with correct parameters
+        mock_cursor.execute.assert_called_once_with(
+            "INSERT INTO vending_machines (location, status) VALUES (%s, %s)",
+            ("Copenhagen", "FULL")
+        )
+        mock_conn.commit.assert_called_once()
+
+    @patch('main_opgave.mysql.connector.connect')
+    @patch('main_opgave.messagebox')   
+    def test_InsertMachine_empty_location(self, mock_messagebox, mock_connect):
+        # Mock Entry widgets with empty location
+        mock_machineID = Mock()
+        mock_machineID.get.return_value = "1"
+        mock_location = Mock()
+        mock_location.get.return_value = ""
+        mock_status = Mock()
+        mock_status.get.return_value = "FULL"
+
+        # Call the function with empty location
+        main_opgave.insertMachine(mock_machineID, mock_location, mock_status)
+        
+        # Verify that error message was shown
+        mock_messagebox.showinfo.assert_called_once_with("Insert Status", "Location required")
+        # Verify that database was NOT called
+        mock_connect.assert_not_called()
+        
+
+    @patch('main_opgave.mysql.connector.connect')
     @patch('main_opgave.messagebox')    
 
     def test_Insert_valid_data(self, mock_messagebox, mock_connect):
