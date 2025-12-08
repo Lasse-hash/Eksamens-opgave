@@ -13,6 +13,7 @@ config = dotenv_values(r".env")
 
 window.title("Vending Machine management")
 
+#making different windows 
 window2 = Toplevel(window)
 window2.geometry("940x800")
 window2.withdraw()
@@ -213,10 +214,15 @@ def insertMachine(machineID, machineLocation, status):
     machineid = machineID.get().strip()
     machinelocation = machineLocation.get().strip()
     Status = status.get().strip()
-    if machinelocation == "" or machineid == "" or Status == machineStatus[0]:
-        messagebox.showinfo("Insert Status", "location and status required")
-    elif Status == machineStatus[0]:
-        messagebox.showinfo("Insert Status", "Status cant be NONE")
+    if machinelocation == "":
+        if status == machineStatus[0]:
+            messagebox.showinfo("Insert Status", "Location and Status required")
+            return
+        else:
+            messagebox.showinfo("Insert Status", "Location required")
+            return
+        
+    
     else: 
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObject = conn.cursor()
@@ -358,8 +364,6 @@ def getitem(itemID, machineID, itemName):
         
         cursorObjeckt.close()
         conn.close()
-
-
 #endregion
 
 #region Update Funtion
@@ -524,8 +528,6 @@ def deleteItem(itemIDField):
     finally:
         cursor.close()
         conn.close()   
-        
-
 #endregion
 
 #region Main
