@@ -163,12 +163,119 @@ class TestUpdateFunctions(unittest.TestCase):
         mock_connect.assert_not_called()
 
 
+class TestGetValuesFunctions(unittest.TestCase):
 
+    @patch('main_opgave.mysql.connector.connect')
+    @patch('main_opgave.messagebox')
+    @patch('main_opgave.tree2')
+    def test_getValues_empty_fields(self, mock_tree2, mock_messagebox, mock_connect):
+        # Patch the global variable directly
+        main_opgave.machineStatus = ['A', 'B', 'C', 'D', 'E', 'OFFLINE']
+        
+        machineid = Mock()
+        machineid.get.return_value = ''
+        machinelocation = Mock()
+        machinelocation.get.return_value = ''
+        status = Mock()
+        status.get.return_value = 'OFFLINE'  # machineStatus[5]
+        
+        main_opgave.getValues(machineid, machinelocation, status)
+        
+        mock_messagebox.showinfo.assert_called_once_with("Update Status", "Failed: Must put machine id")
+        mock_connect.assert_not_called()
 
+    @patch('main_opgave.mysql.connector.connect')
+    @patch('main_opgave.messagebox')
+    @patch('main_opgave.tree2')
+    def test_getValues_with_fields(self, mock_tree2, mock_messagebox, mock_connect):
+        # Patch the global variable directly
+        main_opgave.machineStatus = ['A', 'B', 'C', 'D', 'E', 'OFFLINE']
+        main_opgave.config = {"DB_HOST": "h", "DB_USER": "u", "DB_PASSWORD": "p", "DB_NAME": "db"}
+
+        machineid = Mock()
+        machineid.get.return_value = '42'
+        machinelocation = Mock()
+        machinelocation.get.return_value = 'Viborg'
+        status = Mock()
+        status.get.return_value = 'ACTIVE'
+
+        mock_conn = Mock()
+        mock_cursor = Mock()
+        mock_connect.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+        mock_cursor.fetchall.return_value = [(42, "Viborg", "ACTIVE")]
+
+        mock_tree2.get_children.return_value = [1, 2]
+
+        main_opgave.getValues(machineid, machinelocation, status)
+
+        mock_messagebox.showinfo.assert_not_called()
+        mock_connect.assert_called_once()
+        mock_cursor.execute.assert_called_once()
+        mock_cursor.fetchall.assert_called_once()
+        mock_tree2.delete.assert_any_call(1)
+        mock_tree2.delete.assert_any_call(2)
+        mock_tree2.insert.assert_called_once_with("", "end", values=(42, "Viborg", "ACTIVE"))
+        mock_cursor.close.assert_called_once()
+        mock_conn.close.assert_called_once()
+
+class TestGetItemFunctions(unittest.TestCase):
+
+    @patch('main_opgave.mysql.connector.connect')
+    @patch('main_opgave.messagebox')
+    @patch('main_opgave.tree')
+    def test_getitem_empty_fields(self, mock_tree, mock_messagebox, mock_connect):
+        itemID = Mock()
+        itemID.get.return_value = ''
+        machineID = Mock()
+        machineID.get.return_value = ''
+        itemName = Mock()
+        itemName.get.return_value = ''
+
+        main_opgave.getitem(itemID, machineID, itemName)
+
+        mock_messagebox.showinfo.assert_called_once_with("Get Status", "Atleast one field required to get values")
+        mock_connect.assert_not_called()
+
+    @patch('main_opgave.mysql.connector.connect')
+    @patch('main_opgave.messagebox')
+    @patch('main_opgave.tree')
+    def test_getitem_with_fields(self, mock_tree, mock_messagebox, mock_connect):
+        # Prepare mocks
+        main_opgave.config = {"DB_HOST": "h", "DB_USER": "u", "DB_PASSWORD": "p", "DB_NAME": "db"}
+
+        itemID = Mock()
+        itemID.get.return_value = '13'
+        machineID = Mock()
+        machineID.get.return_value = '77'
+        itemName = Mock()
+        itemName.get.return_value = 'Pepsi'
+
+        mock_conn = Mock()
+        mock_cursor = Mock()
+        mock_connect.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+        mock_cursor.fetchall.return_value = [(13, 77, "Pepsi")]
+
+        mock_tree.get_children.return_value = [9]
+
+        main_opgave.getitem(itemID, machineID, itemName)
+
+        mock_messagebox.showinfo.assert_not_called()
+        mock_connect.assert_called_once()
+        mock_cursor.execute.assert_called_once()
+        mock_cursor.fetchall.assert_called_once()
+        mock_tree.delete.assert_any_call(9)
+        mock_tree.insert.assert_called_once_with("", "end", values=(13, 77, "Pepsi"))
+        mock_cursor.close.assert_called_once()
+        mock_conn.close.assert_called_once()
 
 
 if __name__ == '__main__':
 
     unittest.main()
+
+#1
+
 
 
