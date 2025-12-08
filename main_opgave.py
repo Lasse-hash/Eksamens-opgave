@@ -443,7 +443,7 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
             messagebox.showinfo("Update Status", "Updated items")
 
         conn.commit()
-        cursor.close()
+        cursorObjekt.close() 
         conn.close()
 #endregion
 
