@@ -213,8 +213,10 @@ def insertMachine(machineID, machineLocation, status):
     machineid = machineID.get().strip()
     machinelocation = machineLocation.get().strip()
     Status = status.get().strip()
-    if machinelocation == "" or machineid == "" or Status == machineStatus[5]:
+    if machinelocation == "" or machineid == "" or Status == machineStatus[0]:
         messagebox.showinfo("Insert Status", "location and status required")
+    elif Status == machineStatus[0]:
+        messagebox.showinfo("Insert Status", "Status cant be NONE")
     else: 
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObject = conn.cursor()
