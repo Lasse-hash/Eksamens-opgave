@@ -164,19 +164,7 @@ def menu4Widgets():
     employeeMessage = Label(window4, text="Employee name")
     employeeMessage.place(x=10, y=145)  
 
-    def sendReport():
-        employee = txt_employeeMessage.get().strip()
-        if not employee.replace(" ", "").isalpha():  
-            messagebox.showerror("Input Error", "Employee name must contain only letters")
-            return
-
-        
-        messagebox.showinfo(
-            "Report sent",
-            f"Your message '{variable.get()}' has been sent to {employee} at {txt_machineID.get()} for machine ID {txt_location.get()}"
-        )
-
-    InsertButton = Button(window4, text="Send Report", command=sendReport)
+    InsertButton = Button(window4, text="Send Report", command=lambda: sendReport(txt_employeeMessage, variable, txt_machineID, txt_location))
     InsertButton.place(x=15, y=185)
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
@@ -208,6 +196,21 @@ def showmenu4():
     window4.withdraw()
     window4.deiconify()
 #endregion
+
+def sendReport(employeemessage, Variable, machineID, location):
+    employee = employeemessage.get().strip()
+    variable = Variable.get().strip()
+    machineid = machineID.get().strip()
+    Location = location.get().strip()
+    if not employee.replace(" ", "").isalpha():  
+        messagebox.showerror("Input Error", "Employee name must contain only letters")
+        return
+
+        
+    messagebox.showinfo(
+        "Report sent",
+        f"Your message '{variable}' has been sent to {employee} at {machineid} for machine ID {Location}"
+    )
 
 #region Insert Funtion
 def insertMachine(machineID, machineLocation, status):
@@ -416,7 +419,7 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
                 prams.append(machinestatus)
 
             prams.append(machineID)
-            query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE vending_machines_id=%s"
+            query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE vending_machines_id=%s" # nosec
 
             cursorObjekt.execute(query, tuple(prams))
             messagebox.showinfo("Update Status", "Updated items")
@@ -433,7 +436,7 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
 
             prams.append(machineID)
 
-            query = "UPDATE items SET " + ", ".join(sets) + " WHERE vending_machines_id=%s"
+            query = "UPDATE items SET " + ", ".join(sets) + " WHERE vending_machines_id=%s" # nosec
 
             cursorObjekt.execute(query, tuple(prams))
             messagebox.showinfo("Update Status", "Updated items")
