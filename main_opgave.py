@@ -193,7 +193,9 @@ def menu4Widgets():
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
     MenuButton.place(x=15, y=225)
+#enregion
 
+#region Window Control
 # Funktionerne under her bruges til at skifte mellem vinduer, så kun én af dem vises ad gangen.
 def showmenu():
     window2.withdraw()
@@ -443,14 +445,14 @@ def updateItems(itemid, machineitem, itemamount):
         Messageboxhandler("Fetch status", "Need to put item ID to update the item.")
         return
     else:
-        try:
+        try:  # Check til at finde ud af om itemID er et numerisk tal
             itemidTry = itemid.get()
             itemidTry = int(itemidTry)
         except ValueError:
             Messageboxhandler("Update Status", "Failed: ID must be a number")
             return
         if itemamount:
-            try:
+            try:   # Check til at finde ud af om item Amount er et numerisk tal
                 itemamountTry = itemamount.get()
                 itemamountTry = int(itemamountTry)
             except ValueError:
@@ -460,10 +462,11 @@ def updateItems(itemid, machineitem, itemamount):
         machineItem = machineitem.get() if machineitem else ""
         itemAmount = itemamount.get() if itemamount else ""
 
-        if not (machineItem or itemAmount):
+        if not (machineItem or itemAmount): 
             Messageboxhandler("Fetch status", "Need atleast one field filled.")
             return
 
+        # Dictionary der definerer hvilke dfelter i databasen der må opdaters, og hvordan de skal indsættes i SQL 
         allowed_columns = {
             "item_name": "item_name=%s",
             "quantity": "quantity=%s",
@@ -473,9 +476,10 @@ def updateItems(itemid, machineitem, itemamount):
         cursorObjekt = conn.cursor()
 
         if machineitem or itemamount:
+            # bruger lists til de kolonner og værdier der ksla opdateres
             sets = []
             prams = []
-            if machineItem != "":
+            if machineItem != "":   # Hvis brugeren har skrevet noget i feltet, tilføjes det til UPDATE-sætningen.
                 sets.append(allowed_columns["item_name"])
                 prams.append(machineItem)
             if itemAmount != "":
@@ -484,6 +488,8 @@ def updateItems(itemid, machineitem, itemamount):
 
             if sets:
                 prams.append(itemID)
+
+                # Her bliver vores UPDATE sætning bygget.
                 query = "UPDATE items SET " + ", ".join(sets) + " WHERE id=%s" # nosec
 
             cursorObjekt.execute(query, tuple(prams))
