@@ -385,6 +385,15 @@ def updateMachine(machineid, machinelocation, status):
         except ValueError:
             messagebox.showinfo("Update Status", "Failed: ID must be a number")
             return
+
+        # Kun valider itemamount hvis den ikke er None
+        if itemamount is not None:
+            try:
+                itemamountTry = itemamount.get()
+                itemamountTry = int(itemamountTry)
+            except ValueError:
+                messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+                return
         
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
@@ -399,7 +408,7 @@ def updateMachine(machineid, machinelocation, status):
 
         if not (machineLocation or machinestatus):
             messagebox.showinfo("Fetch status", "Need atleast one field filled.")
-            return
+
 
         if machinelocation or status:
             sets = []
@@ -481,6 +490,7 @@ def updateItems(itemid, machineitem, itemamount):
     conn.commit()
     cursor.close()
     conn.close()
+
 #endregion
 
 
