@@ -386,6 +386,15 @@ def updateMachine(machineid, machinelocation, status):
             messagebox.showinfo("Update Status", "Failed: ID must be a number")
             return
         
+        # Kun valider itemamount hvis den ikke er None
+        if itemamount is not None:
+            try:
+                itemamountTry = itemamount.get()
+                itemamountTry = int(itemamountTry)
+            except ValueError:
+                messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+                return
+        
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
 
