@@ -418,9 +418,9 @@ def updateMachine(machineid, machinelocation, status):
                 cursorObjekt.execute(query, tuple(prams))
                 Messageboxhandler("Update Status", "Updated items")
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        conn.commit()
+        cursorObjekt.close()
+        conn.close()
 
 def updateItems(itemid, machineitem, itemamount):  
     itemID = itemid.get()
