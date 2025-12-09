@@ -36,7 +36,6 @@ machineStatus = ["NONE", "FULL","HALF", "LOW", "EMPTY", "OFFLINE"]
 options = ["NONE", "Refill machine", "Report issue", "Request maintenance"]
 
 def Messageboxhandler(Messageboxheader, MessageboxText):
-
     global messageboxstate
     if messageboxstate == False:
         messageboxstate = True
@@ -84,7 +83,6 @@ def menu2Widgets():
     txt_ItemID.place(x=155, y=125)
     ItemID = Label(window2, text="item ID")
     ItemID.place(x=10, y=125)
-
 
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
@@ -149,7 +147,6 @@ def menu3Widgets():
     MenuButton = Button(window3, text="Menu", command=showmenu)
     MenuButton.place(x=10, y=275)   
 
-
 def menu4Widgets():
     txt_location = Entry(window4, width=25)
     txt_location.place(x=155, y=35) 
@@ -178,8 +175,6 @@ def menu4Widgets():
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
     MenuButton.place(x=15, y=225)
-
-
 
 def showmenu():
     window2.withdraw()
@@ -420,7 +415,7 @@ def updateMachine(machineid, machinelocation, status):
         machinestatus = status.get() if status else machineStatus[0]
 
         if not (machineLocation or machinestatus):
-            messagebox.showinfo("Fetch status", "Need atleast one field filled.")
+            Messageboxhandler("Fetch status", "Need atleast one field filled.")
             return
 
         if machinelocation or status:
@@ -438,7 +433,7 @@ def updateMachine(machineid, machinelocation, status):
                 query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE id=%s" # nosec
 
                 cursorObjekt.execute(query, tuple(prams))
-                messagebox.showinfo("Update Status", "Updated items")
+                Messageboxhandler("Update Status", "Updated items")
 
     conn.commit()
     cursor.close()
@@ -448,7 +443,7 @@ def updateItems(itemid, machineitem, itemamount):
     itemID = itemid.get()
 
     if itemID == "":
-        messagebox.showinfo("Fetch status", "Need to put item ID to update the item.")
+        Messageboxhandler("Fetch status", "Need to put item ID to update the item.")
         return
 
     else:
@@ -457,21 +452,21 @@ def updateItems(itemid, machineitem, itemamount):
             itemidTry = int(itemidTry)
             
         except ValueError:
-            messagebox.showinfo("Update Status", "Failed: ID must be a number")
+            Messageboxhandler("Update Status", "Failed: ID must be a number")
             return
         if itemamount:
             try:
                 itemamountTry = itemamount.get()
                 itemamountTry = int(itemamountTry)
             except ValueError:
-                messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+                Messageboxhandler("Update Status", "Failed: Item Amount must be a number")
                 return
 
         machineItem = machineitem.get() if machineitem else ""
         itemAmount = itemamount.get() if itemamount else ""
 
         if not (machineItem or itemAmount):
-            messagebox.showinfo("Fetch status", "Need atleast one field filled.")
+            Messageboxhandler("Fetch status", "Need atleast one field filled.")
             return
 
         allowed_columns = {
