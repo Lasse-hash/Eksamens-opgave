@@ -462,8 +462,6 @@ def updateItems(itemid, machineitem, itemamount):
             "quantity": "quantity=%s",
         }
 
-        cursorObjekt.execute(query, tuple(prams))
-        Messageboxhandler("Update Status", "Updated items")
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
 
