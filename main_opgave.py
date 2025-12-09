@@ -73,7 +73,7 @@ def menu2Widgets():
 
     txt_ItemID = Entry(window2, width=25)
     txt_ItemID.place(x=155, y=125)
-    ItemID = Label(window2, text="Enter item ID (for delete)")
+    ItemID = Label(window2, text="item ID")
     ItemID.place(x=10, y=125)
 
 
@@ -89,7 +89,7 @@ def menu2Widgets():
     DeleteButton = Button(window2, text="Delete by item ID", command=lambda: deleteItem(txt_ItemID))
     DeleteButton.place(x=10, y=225)
 
-    UpdateButton = Button(window2, text="Update", command=lambda: updateValues(txt_machineID, None, None, txt_Item, txt_itemAmount))
+    UpdateButton = Button(window2, text="Update", command=lambda: updateItems(txt_ItemID, txt_Item, txt_itemAmount))
     UpdateButton.place(x=10, y=255)
 
     MenuButton = Button(window2, text="Menu", command=showmenu)
@@ -121,7 +121,7 @@ def menu3Widgets():
     status = Label(window3, text="Enter the machine status")
     status.place(x=10, y=95)
 
-    InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_machineID, txt_location, machineStatusVar))
+    InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_location, machineStatusVar))
     InsertButton.place(x=10, y=135)
 
     GetButton = Button(window3, text="Get Machine", command=lambda: getValues(txt_machineID, txt_location, machineStatusVar))
@@ -134,7 +134,7 @@ def menu3Widgets():
 
     DeleteButton.place(x=10, y=195)
 
-    UpdateButton = Button(window3, text="Update Information", command=lambda: updateValues(txt_machineID, txt_location, machineStatusVar, None, None))
+    UpdateButton = Button(window3, text="Update Information", command=lambda: updateMachine(txt_machineID, txt_location, machineStatusVar))
     UpdateButton.place(x=10, y=225)
 
     MenuButton = Button(window3, text="Menu", command=showmenu)
@@ -213,12 +213,11 @@ def sendReport(employeemessage, Variable, machineID, location):
     )
 
 #region Insert Funtion
-def insertMachine(machineID, machineLocation, status):
-    machineid = machineID.get().strip()
+def insertMachine(machineLocation, status):
     machinelocation = machineLocation.get().strip()
     Status = status.get().strip()
     if machinelocation == "":
-        if status == machineStatus[0]:
+        if Status == machineStatus[0]:
             messagebox.showinfo("Insert Status", "Location and Status required")
             return
         else:
@@ -291,8 +290,8 @@ def getValues(machineid, machinelocation, status):
     machineID = machineid.get()
     machineLocation = machinelocation.get()
     machinestatus = status.get()
-    if machineID == "" and machineLocation == "" and machinestatus == machineStatus[5]:
-        messagebox.showinfo("Update Status", "Failed: Must put machine id")
+    if machineID == "" and machineLocation == "" and machinestatus == machineStatus[0]:
+        messagebox.showinfo("Update Status", "Failed: atleast one field required")
     else:
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjeckt = conn.cursor()
@@ -306,7 +305,7 @@ def getValues(machineid, machinelocation, status):
         if machineLocation.strip():
             condition.append("location=%s")
             params.append(machineLocation.strip())
-        if machinestatus.strip():
+        if machinestatus.strip() != machineStatus[0]:
             condition.append("status=%s")
             params.append(machinestatus.strip())
 
@@ -371,10 +370,13 @@ def getitem(itemID, machineID, itemName):
 #endregion
 
 #region Update Funtion
-def updateValues(machineid, machinelocation, status, machineitem, itemamount):
+def updateMachine(machineid, machinelocation, status):
+
     machineID = machineid.get()
+    
     if machineID == "":
         messagebox.showinfo("Update Status", "Failed: Must put machine id")
+        return
     else:
         try:
             machineidTry = machineid.get()
@@ -383,68 +385,102 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
         except ValueError:
             messagebox.showinfo("Update Status", "Failed: ID must be a number")
             return
-        try:
-            itemamountTry = itemamount.get()
-            itemamountTry = int(itemamountTry)
-        except ValueError:
-            messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
-            return
         
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
 
         allowed_columns = {
-            "item_name": "item_name=%s",
-            "quantity": "quantity=%s",
             "status": "status=%s",
             "location": "location=%s"
         }
         
-        machineLocation = machinelocation.get() if machinelocation else None
-        machinestatus = status.get() if status else None
-        machineItem = machineitem.get() if machineitem else None
-        itemAmount = itemamount.get() if itemamount else None
+        machineLocation = machinelocation.get() if machinelocation else ""
+        machinestatus = status.get() if status else machineStatus[0]
 
-        if not (machineLocation or machinestatus or machineItem or itemAmount):
-            messagebox.showinfo("Fetch status", "Need atleast one line filled")
+        if not (machineLocation or machinestatus):
+            messagebox.showinfo("Fetch status", "Need atleast one field filled.")
             return
 
         if machinelocation or status:
             sets = []
             prams = []
-            if machinelocation:
+            if machineLocation != "":
                 sets.append(allowed_columns["location"])
                 prams.append(machineLocation)
-            if status:
+            if machinestatus != machineStatus[0]:
                 sets.append(allowed_columns["status"])
                 prams.append(machinestatus)
 
-            prams.append(machineID)
-            query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE vending_machines_id=%s" # nosec
+            if sets:
+                prams.append(machineID)
+                query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE id=%s" # nosec
 
-            cursorObjekt.execute(query, tuple(prams))
-            messagebox.showinfo("Update Status", "Updated items")
+                cursorObjekt.execute(query, tuple(prams))
+                messagebox.showinfo("Update Status", "Updated items")
 
-        if machineitem or itemamount is not None:
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def updateItems(itemid, machineitem, itemamount):  
+    itemID = itemid.get()
+
+    if itemID == "":
+        messagebox.showinfo("Fetch status", "Need to put item ID to update the item.")
+        return
+
+    else:
+        try:
+            itemidTry = itemid.get()
+            itemidTry = int(itemidTry)
+            
+        except ValueError:
+            messagebox.showinfo("Update Status", "Failed: ID must be a number")
+            return
+        if itemamount:
+            try:
+                itemamountTry = itemamount.get()
+                itemamountTry = int(itemamountTry)
+            except ValueError:
+                messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+                return
+
+        machineItem = machineitem.get() if machineitem else ""
+        itemAmount = itemamount.get() if itemamount else ""
+
+        if not (machineItem or itemAmount):
+            messagebox.showinfo("Fetch status", "Need atleast one field filled.")
+            return
+
+        allowed_columns = {
+            "item_name": "item_name=%s",
+            "quantity": "quantity=%s",
+        }
+
+        conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
+        cursorObjekt = conn.cursor()
+
+        if machineitem or itemamount:
             sets = []
             prams = []
-            if machineitem:
+            if machineItem != "":
                 sets.append(allowed_columns["item_name"])
                 prams.append(machineItem)
-            if itemamount is not None:
+            if itemAmount != "":
                 sets.append(allowed_columns["quantity"])
                 prams.append(itemAmount)
 
-            prams.append(machineID)
+            if sets:
+                prams.append(itemID)
 
-            query = "UPDATE items SET " + ", ".join(sets) + " WHERE vending_machines_id=%s" # nosec
+                query = "UPDATE items SET " + ", ".join(sets) + " WHERE id=%s" # nosec
 
-            cursorObjekt.execute(query, tuple(prams))
-            messagebox.showinfo("Update Status", "Updated items")
+                cursorObjekt.execute(query, tuple(prams))
+                messagebox.showinfo("Update Status", "Updated items")
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+    conn.commit()
+    cursor.close()
+    conn.close()
 #endregion
 
 
