@@ -286,7 +286,7 @@ def insertItem(itemID, machineID, amount):
     conn.close()
     Messageboxhandler("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
     
-    # Gamle ekstra tjek (måske lidt mærkelige, men beholdt som originalen ønskede)
+    # Input validering
     if itemid == "" or machineid == "" or Amount == "":    
         Messageboxhandler("Insert Error", "All fields are required")
         return
