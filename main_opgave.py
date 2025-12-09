@@ -36,7 +36,6 @@ machineStatus = ["NONE", "FULL","HALF", "LOW", "EMPTY", "OFFLINE"]
 options = ["NONE", "Refill machine", "Report issue", "Request maintenance"]
 
 def Messageboxhandler(Messageboxheader, MessageboxText):
-
     global messageboxstate
     if messageboxstate == False:
         messageboxstate = True
@@ -84,7 +83,6 @@ def menu2Widgets():
     txt_ItemID.place(x=155, y=125)
     ItemID = Label(window2, text="item ID")
     ItemID.place(x=10, y=125)
-
 
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
@@ -149,7 +147,6 @@ def menu3Widgets():
     MenuButton = Button(window3, text="Menu", command=showmenu)
     MenuButton.place(x=10, y=275)   
 
-
 def menu4Widgets():
     txt_location = Entry(window4, width=25)
     txt_location.place(x=155, y=35) 
@@ -178,8 +175,6 @@ def menu4Widgets():
 
     MenuButton = Button(window4, text="Menu", command=showmenu)
     MenuButton.place(x=15, y=225)
-
-
 
 def showmenu():
     window2.withdraw()
@@ -423,9 +418,9 @@ def updateMachine(machineid, machinelocation, status):
                 cursorObjekt.execute(query, tuple(prams))
                 Messageboxhandler("Update Status", "Updated items")
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        conn.commit()
+        cursorObjekt.close()
+        conn.close()
 
 def updateItems(itemid, machineitem, itemamount):  
     itemID = itemid.get()
