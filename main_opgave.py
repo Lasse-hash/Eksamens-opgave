@@ -4,20 +4,25 @@ from tkinter import ttk
 from dotenv import dotenv_values
 import mysql.connector
 
+# Her laver vi hovedvinduet til programmet, så man kan se det på skærmen.
 window = Tk()
 
+# Sætter størrelsen på hovedvinduet, så det ikke fylder hele skærmen.
 window.geometry("350x150")
 
+# Variabel der holder styr på om der allerede bliver vist en messagebox popup.
 messageboxstate = False
 
+# Her læses databaseoplysninger fra en .env fil
 config = dotenv_values(r".env")
 
+# Giver vinduet en overskrift øverst
 window.title("Vending Machine management")
 
-#making different windows 
+# Her laver vi flere ekstra skjulte vinduer, som vi bruger til menuer osv
 window2 = Toplevel(window)
 window2.geometry("940x800")
-window2.withdraw()
+window2.withdraw() # skjuler vinduet
 
 window3 = Toplevel(window)
 window3.geometry("940x800")
@@ -27,14 +32,17 @@ window4 = Toplevel(window)
 window4.geometry("940x800")
 window4.withdraw()
 
+# Laver tabeller ligesom Excel/regneark til de to menu-vinduer
 tree = ttk.Treeview(window2, columns=("ID", "Machine ID", "Item Name", "Stock"), show="headings")
-
 tree2 = ttk.Treeview(window3, columns=("ID", "Location", "Status"), show="headings")
 
-machineStatus = ["NONE", "FULL","HALF", "LOW", "EMPTY", "OFFLINE"]
+# Dette er mulighederne for status på maskinerne
+machineStatus = ["NONE", "FULL", "HALF", "LOW", "EMPTY", "OFFLINE"]
 
+# Mulighederne hvis man skal sende besked til en medarbejder
 options = ["NONE", "Refill machine", "Report issue", "Request maintenance"]
 
+# Funktion der viser en besked i et popup-vindue. Så man kan give info til brugeren.
 def Messageboxhandler(Messageboxheader, MessageboxText):
     global messageboxstate
     if messageboxstate == False:
@@ -43,6 +51,7 @@ def Messageboxhandler(Messageboxheader, MessageboxText):
         messageboxstate = False
 
 #region Widgets
+# Menu-knapper der viser de forskellige sider i programmet når man trykker på dem
 def menuwidgets():
     placemachineButton = Button(window, text="Place a Vending Machine", command=showmenu3)
     placemachineButton.place(x=20, y=40)
@@ -53,7 +62,9 @@ def menuwidgets():
     KontaktmedarbejderButton = Button(window, text="Contact Employee", command=showmenu4)
     KontaktmedarbejderButton.place(x=120, y=80)
 
+# Her laver vi alle felter og knapper til menuen hvor man styrer varer i automaten
 def menu2Widgets():
+    # Kolonne-navne til tabellen så man kan se hvad hvad er
     tree.heading("ID", text="ID")
     tree.heading("Machine ID", text="Machine ID")
     tree.heading("Item Name", text="Item Name")
@@ -64,6 +75,7 @@ def menu2Widgets():
     tree.column("Stock", width=60)
     tree.place(x=350, y=30, width=400, height=200)
 
+    # Tekstfelter og tekst til brugerens inputs (f.eks. maskin-ID, varenavn, antal)
     txt_machineID = Entry(window2, width=25)
     txt_machineID.place(x=155, y=35)
     machineID = Label(window2, text="Enter vending machine ID")
@@ -84,9 +96,11 @@ def menu2Widgets():
     ItemID = Label(window2, text="item ID")
     ItemID.place(x=10, y=125)
 
+    # En overskrift øverst
     lbl = Label(window2, text="Vending Machine management", font="Areial")
     lbl.place(x=0, y=0)
 
+    # Knapper til at indsætte, hente, slette eller opdatere varer
     InsertButton = Button(window2, text="Insert item", command=lambda: insertItem(txt_Item, txt_machineID, txt_itemAmount))
     InsertButton.place(x=10, y=165)
 
@@ -102,6 +116,7 @@ def menu2Widgets():
     MenuButton = Button(window2, text="Menu", command=showmenu)
     MenuButton.place(x=10, y=305)
 
+# Her laver vi input felter, labels og knapper til det vindue hvor man kan styre information om selve maskinerne
 def menu3Widgets():
     tree2.heading("ID", text="ID")
     tree2.heading("Location", text="Location")
@@ -120,7 +135,8 @@ def menu3Widgets():
     txt_location.place(x=80, y=65)
     location = Label(window3, text="Enter City")
     location.place(x=10, y=65)
-    
+
+    # Dropdown menu hvor man kan vælge status på maskinen
     machineStatusVar = StringVar(window3)
     machineStatusVar.set(machineStatus[0])
     machineStatusMenu = OptionMenu(window3, machineStatusVar, *machineStatus)
@@ -128,6 +144,7 @@ def menu3Widgets():
     status = Label(window3, text="Enter the machine status")
     status.place(x=10, y=95)
 
+    # Knapper til at tilføje, opdatere og fjerne maskiner
     InsertButton = Button(window3, text="Insert Machine", command=lambda: insertMachine(txt_location, machineStatusVar))
     InsertButton.place(x=10, y=135)
 
@@ -135,10 +152,9 @@ def menu3Widgets():
     GetButton.place(x=10, y=165)
 
     DeleteButton = Button(
-    window3, 
-    text="Remove Machine", 
-    command=lambda: delete_Vending(txt_machineID))
-
+        window3, 
+        text="Remove Machine", 
+        command=lambda: delete_Vending(txt_machineID))
     DeleteButton.place(x=10, y=195)
 
     UpdateButton = Button(window3, text="Update Information", command=lambda: updateMachine(txt_machineID, txt_location, machineStatusVar))
@@ -147,6 +163,7 @@ def menu3Widgets():
     MenuButton = Button(window3, text="Menu", command=showmenu)
     MenuButton.place(x=10, y=275)   
 
+# Her laver vi input felter og knap, hvis man vil skrive til en medarbejder (fx hvis der er fejl på maskinen)
 def menu4Widgets():
     txt_location = Entry(window4, width=25)
     txt_location.place(x=155, y=35) 
@@ -158,6 +175,7 @@ def menu4Widgets():
     machineID = Label(window4, text="Enter vending machine ID")
     machineID.place(x=10, y=35)
 
+    # Her er dropdown med muligheder for hvad man vil sige til medarbejderen
     variable = StringVar(window4)
     variable.set(options[0])
     optionsMenu = OptionMenu(window4, variable, *options)
@@ -176,6 +194,7 @@ def menu4Widgets():
     MenuButton = Button(window4, text="Menu", command=showmenu)
     MenuButton.place(x=15, y=225)
 
+# Funktionerne under her bruges til at skifte mellem vinduer, så kun én af dem vises ad gangen.
 def showmenu():
     window2.withdraw()
     window3.withdraw()
@@ -201,6 +220,7 @@ def showmenu4():
     window4.deiconify()
 #endregion
 
+# Funktion til at sende besked til medarbejderen, med tjek hvis man taster noget forkert ind
 def sendReport(employeemessage, Variable, machineID, location):
     employee = employeemessage.get().strip()
     variable = Variable.get().strip()
@@ -209,26 +229,23 @@ def sendReport(employeemessage, Variable, machineID, location):
     if not employee.replace(" ", "").isalpha():  
         Messageboxhandler("Input Error", "Employee name must contain only letters")
         return
-
-        
     Messageboxhandler(
         "Report sent",
         f"Your message '{variable}' has been sent to {employee} at {machineid} for machine ID {Location}"
     )
 
 #region Insert Funtion
+# Funktion til at lægge en ny maskine ind i databasen (med location og status)
 def insertMachine(machineLocation, status):
     machinelocation = machineLocation.get().strip()
     Status = status.get().strip()
     if machinelocation == "":
         if Status == machineStatus[0]:
-                Messageboxhandler("Insert Status", "Location and Status required")
-                return
+            Messageboxhandler("Insert Status", "Location and Status required")
+            return
         else:
-                Messageboxhandler("Insert Status", "Location required")
-                return
-        
-    
+            Messageboxhandler("Insert Status", "Location required")
+            return
     else: 
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObject = conn.cursor()
@@ -238,16 +255,17 @@ def insertMachine(machineLocation, status):
         Messageboxhandler("insert status", "inserted machine into database")
         conn.close()
 
+# Funktion til at ligge en vare ind i databasen for en maskine
 def insertItem(itemID, machineID, amount):
     itemid = itemID.get().strip()
     machineid = machineID.get().strip()
     Amount = amount.get().strip()
     if itemid == "" or machineid == "" or Amount == "":
         Messageboxhandler("Insert Status", "All fields required")
-        return  # Rettetelse på kode fra fordi unittest: kræver return for at stoppe funktionen
+        return  # Hvis nogen felter mangler, stoppes funktionen
     else:
         try:
-            Amount = int(Amount)  # Make sure amount is a number
+            Amount = int(Amount)  # Sikrer at amount faktisk er et tal
         except ValueError:
             Messageboxhandler("Insert Error", "Amount must be a number")
             return
@@ -258,8 +276,7 @@ def insertItem(itemID, machineID, amount):
         database=config["DB_NAME"]
     )
     cursor = conn.cursor()
-
-    # Insert item into the items table
+    # Her indsætter vi varen i tabellen
     cursor.execute(
         "INSERT INTO items (item_name, quantity, vending_machine_id) VALUES (%s, %s, %s)",
         (itemid, Amount, machineid)
@@ -269,16 +286,15 @@ def insertItem(itemID, machineID, amount):
     conn.close()
     Messageboxhandler("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
     
+    # Gamle ekstra tjek (måske lidt mærkelige, men beholdt som originalen ønskede)
     if itemid == "" or machineid == "" or Amount == "":    
         Messageboxhandler("Insert Error", "All fields are required")
         return
 
-    
     if not itemid.replace(" ", "").isalpha():    
         Messageboxhandler("Insert Error", "Item name must contain only letters")
         return
 
-   
     try:
         Amount = int(Amount)
     except ValueError:
@@ -287,6 +303,7 @@ def insertItem(itemID, machineID, amount):
 #endregion
 
 #region Get Funtion
+# Funktion til at finde maskiner i databasen ud fra brugerens input
 def getValues(machineid, machinelocation, status):
     machineID = machineid.get()
     machineLocation = machinelocation.get()
@@ -316,18 +333,18 @@ def getValues(machineid, machinelocation, status):
 
         cursorObjeckt.execute(query, tuple(params))
         
+        # Tømmer tabellen inden vi viser nye data
         for item in tree2.get_children():
             tree2.delete(item)
 
         rows = cursorObjeckt.fetchall()
-        
-        
         for row in rows:
             tree2.insert("", "end", values=row)
-        
+
         cursorObjeckt.close()
         conn.close()
 
+# Funktion til at finde varer i databasen med ID eller navn
 def getitem(itemID, machineID, itemName):
     itemid = itemID.get()
     machineid = machineID.get()
@@ -358,34 +375,32 @@ def getitem(itemID, machineID, itemName):
         
         cursorObjeckt.execute(query, tuple(params))
 
+        # Først tømmer vi listen i tabellen
         for item in tree.get_children():
             tree.delete(item)
 
         rows = cursorObjeckt.fetchall()
-        
         for row in rows:
             tree.insert("", "end", values=row)
-        
+
         cursorObjeckt.close()
         conn.close()
 #endregion
 
 #region Update Funtion
+# Funktion til at opdatere (rette) info om en maskine
 def updateMachine(machineid, machinelocation, status):
-
     machineID = machineid.get()
-    
     if machineID == "":
         Messageboxhandler("Update Status", "Failed: Must put machine id")
     else:
         try:
             machineidTry = machineid.get()
             machineidTry = int(machineidTry)
-            
         except ValueError:
             Messageboxhandler("Update Status", "Failed: ID must be a number")
             return
-        
+
         machineLocation = machinelocation.get() if machinelocation else ""
         machinestatus = status.get() if status else machineStatus[0]
 
@@ -414,7 +429,6 @@ def updateMachine(machineid, machinelocation, status):
             if sets:
                 prams.append(machineID)
                 query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE id=%s" # nosec
-
                 cursorObjekt.execute(query, tuple(prams))
                 Messageboxhandler("Update Status", "Updated items")
 
@@ -422,18 +436,16 @@ def updateMachine(machineid, machinelocation, status):
         cursorObjekt.close()
         conn.close()
 
+# Funktion til at rette varer i databasen (fx hvis man har skrevet forkert)
 def updateItems(itemid, machineitem, itemamount):  
     itemID = itemid.get()
-
     if itemID == "":
         Messageboxhandler("Fetch status", "Need to put item ID to update the item.")
         return
-
     else:
         try:
             itemidTry = itemid.get()
             itemidTry = int(itemidTry)
-            
         except ValueError:
             Messageboxhandler("Update Status", "Failed: ID must be a number")
             return
@@ -472,7 +484,6 @@ def updateItems(itemid, machineitem, itemamount):
 
             if sets:
                 prams.append(itemID)
-
                 query = "UPDATE items SET " + ", ".join(sets) + " WHERE id=%s" # nosec
 
             cursorObjekt.execute(query, tuple(prams))
@@ -481,17 +492,15 @@ def updateItems(itemid, machineitem, itemamount):
     conn.commit()
     cursor.close()
     conn.close()
-
 #endregion
 
-
 #region Delete Funtion
+# Funktion til at slette en maskine fra databasen (og alle dens varer)
 def delete_Vending(txt_machineID):
     machineID = txt_machineID.get().strip()
     if not machineID:
         Messageboxhandler("Delete Error", "Please enter a machine ID")
         return 
-
     try:
         conn = mysql.connector.connect(
             host=config["DB_HOST"],
@@ -501,16 +510,16 @@ def delete_Vending(txt_machineID):
         )
         cursor = conn.cursor()
 
-        # Check if machine exists
+        # Tjekker først om maskinen findes
         cursor.execute("SELECT id FROM vending_machines WHERE id=%s", (machineID,))
         if not cursor.fetchone():
             return Messageboxhandler("Delete Error", f"Machine {machineID} does not exist.")
 
-        # Confirm deletion
+        # Pop up hvor bruger skal bekræfte at de vil slette
         if not messagebox.askyesno("Confirm Delete", f"Delete machine {machineID}?"):
             return
 
-        # Delete items and machine
+        # Først slet alle varer fra maskinen, så selve maskinen
         cursor.execute("DELETE FROM items WHERE vending_machine_id=%s", (machineID,))
         cursor.execute("DELETE FROM vending_machines WHERE id=%s", (machineID,))
         conn.commit()
@@ -519,22 +528,19 @@ def delete_Vending(txt_machineID):
 
     except mysql.connector.Error as err:
         Messageboxhandler("Database Error", f"Error: {err}")
-
     finally:
         cursor.close()
         conn.close()
 
+# Funktion til at slette en enkelt vare ud fra dens ID
 def deleteItem(itemIDField):
     item_id = itemIDField.get().strip()
-    
     if not item_id:
         return Messageboxhandler("Delete Error", "Please enter an item ID")
-    
     try:
         item_id = int(item_id)
     except ValueError:
         return Messageboxhandler("Delete Error", "Item ID must be a number")
-    
     try:
         conn = mysql.connector.connect(
             host=config["DB_HOST"],
@@ -544,25 +550,22 @@ def deleteItem(itemIDField):
         )
         cursor = conn.cursor()
 
-        # Hent item info før sletning
+        # Henter navn og maskine på varen før vi sletter, så vi kan vise en besked
         cursor.execute("SELECT item_name, vending_machine_id FROM items WHERE id=%s", (item_id,))
         result = cursor.fetchone()
-        
         if not result:
             return Messageboxhandler("Delete Error", f"Item with ID {item_id} does not exist.")
-        
         item_name, machine_id = result
-        
+
         if not messagebox.askyesno("Confirm Delete", f"Delete '{item_name}' (ID: {item_id}) from machine {machine_id}?"):
             return
-        
-        # Slet den specifikke item baseret på ID
+
+        # Sletter varen
         cursor.execute("DELETE FROM items WHERE id=%s", (item_id,))
         conn.commit()
 
         Messageboxhandler("Delete Status", f"Item '{item_name}' (ID: {item_id}) deleted successfully")
-        
-        # Ryd feltet
+        # Nulstiller feltet så der står tomt bagefter
         itemIDField.delete(0, END)
 
     except mysql.connector.Error as err:
@@ -573,25 +576,22 @@ def deleteItem(itemIDField):
 #endregion
 
 #region Main
+# Det her er hovedfunktionen, hvor vi sørger for at alle vinduer og knapper bliver lavet og programmet starter op med .mainloop()
 def main():
- 
     menu2Widgets()
     menu3Widgets()
     menu4Widgets()
     menuwidgets()
-
     window.mainloop()
 #endregion
 
+# Her starter vi alt det vigtige hvis vi kører filen direkte (fx sørger for at databasen findes og laver database-tabellerne)
 if __name__ == "__main__":
-    
     conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"])
     cursor = conn.cursor()
-    
     sql_file = r"vending_machine_database.sql"
     with open(sql_file, "r") as f:
         sql_commands = f.read()
-    
     for command in sql_commands.split(";"):
         cmd = command.strip()
         if cmd:
