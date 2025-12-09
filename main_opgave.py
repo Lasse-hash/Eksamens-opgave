@@ -386,6 +386,7 @@ def updateMachine(machineid, machinelocation, status):
             messagebox.showinfo("Update Status", "Failed: ID must be a number")
             return
 
+
         # Kun valider itemamount hvis den ikke er None
         if itemamount is not None:
             try:
@@ -408,7 +409,7 @@ def updateMachine(machineid, machinelocation, status):
 
         if not (machineLocation or machinestatus):
             messagebox.showinfo("Fetch status", "Need atleast one field filled.")
-
+            return
 
         if machinelocation or status:
             sets = []
