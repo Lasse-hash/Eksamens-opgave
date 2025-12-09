@@ -2,28 +2,28 @@ import unittest
 from unittest.mock import Mock, MagicMock, patch
 import main_opgave
 
-
+# Testklasse til at teste indsætningsfunktionerne i main_opgave
 class TestInsertFunctions(unittest.TestCase):
     
     @patch('main_opgave.mysql.connector.connect')
-    @patch('main_opgave.Messageboxhandler')   
+    @patch('main_opgave.Messageboxhandler')
     def test_InsertMachine_valid_data(self, mock_messagebox, mock_connect):
-        # Setup mock database connection and cursor
+        # Opretter en "falsk" database forbindelse, så vi ikke bruger en rigtig database til testen
         mock_conn = Mock()
         mock_cursor = Mock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
 
-        # Mock Entry widgets for location and status (kun 2 parametre)
+        # Opretter mocks for felterne location og status og sætter dem til at returnere værdier
         mock_location = Mock()
         mock_location.get.return_value = "Copenhagen"
         mock_status = Mock()
         mock_status.get.return_value = "FULL"
 
-        # Call the function with correct parameters
+        # Kalder insertMachine med gyldige data
         main_opgave.insertMachine(mock_location, mock_status)
 
-        # Verify that the database insert was called with correct parameters
+        # Tjekker at SQL insert blev kaldt korrekt med forventede værdier
         mock_cursor.execute.assert_called_once_with(
             "INSERT INTO vending_machines (location, status) VALUES (%s, %s)",
             ("Copenhagen", "FULL")
@@ -31,35 +31,30 @@ class TestInsertFunctions(unittest.TestCase):
         mock_conn.commit.assert_called_once()
 
     @patch('main_opgave.mysql.connector.connect')
-    @patch('main_opgave.Messageboxhandler')   
+    @patch('main_opgave.Messageboxhandler')
     def test_InsertMachine_empty_location(self, mock_messagebox, mock_connect):
-        # Mock Entry widgets with empty location
+        # Tester at man får fejl, hvis location er tom
         mock_location = Mock()
         mock_location.get.return_value = ""
         mock_status = Mock()
         mock_status.get.return_value = "FULL"
 
-        # Call the function with empty location
         main_opgave.insertMachine(mock_location, mock_status)
         
-        # Verify that error message was shown
+        # Tjekker at fejlbesked blev vist
         mock_messagebox.assert_called_once_with("Insert Status", "Location required")
-        # Verify that database was NOT called
+        # Tjekker at der IKKE blev lavet databaseforbindelse
         mock_connect.assert_not_called()
         
-
     @patch('main_opgave.mysql.connector.connect')
-    @patch('main_opgave.messagebox')    
-
+    @patch('main_opgave.messagebox')
     def test_Insert_valid_data(self, mock_messagebox, mock_connect):
-
-        # Setup mock database connection and cursor
+        # Tester at korrekt data bliver indsættes i databasen for varer
         mock_conn = Mock()
         mock_cursor = Mock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
 
-        # Mock Entry widgets for itemID, machineID, and amount
         mock_itemID = Mock()
         mock_itemID.get.return_value = "Cola"
         mock_machineID = Mock()
@@ -67,10 +62,8 @@ class TestInsertFunctions(unittest.TestCase):
         mock_amount = Mock()
         mock_amount.get.return_value = "10"
 
-        # Call the function with correct parameters
         main_opgave.insertItem(mock_itemID, mock_machineID, mock_amount)
 
-        # Verify that the database insert was called with correct parameters
         mock_cursor.execute.assert_called_once_with(
             "INSERT INTO items (item_name, quantity, vending_machine_id) VALUES (%s, %s, %s)",
             ("Cola", 10, "1")
@@ -80,7 +73,7 @@ class TestInsertFunctions(unittest.TestCase):
     @patch('main_opgave.mysql.connector.connect')
     @patch('main_opgave.messagebox')
     def test_Insert_empty_fields(self, mock_messagebox, mock_connect):
-        # Mock Entry widgets med tomme felter
+        # Tester at der gives fejl hvis et felt er tomt ved insertItem
         mock_itemID = Mock()
         mock_itemID.get.return_value = ""
         mock_machineID = Mock()
@@ -88,47 +81,36 @@ class TestInsertFunctions(unittest.TestCase):
         mock_amount = Mock()
         mock_amount.get.return_value = "10"
 
-        # Mock database så den ikke kaldes
-        mock_conn = Mock()
-        mock_connect.return_value = mock_conn
-
-        # Kald funktionen med tomt itemID
         main_opgave.insertItem(mock_itemID, mock_machineID, mock_amount)
         
-        # Verificer at fejlbesked blev vist
+        # Skal vise fejlbesked til brugeren
         mock_messagebox.showinfo.assert_called_once_with("Insert Status", "All fields required")
-        # Verificer at database IKKE blev kaldt
+        # Skal ikke prøve at forbinde til databasen
         mock_connect.assert_not_called()
     
     @patch('main_opgave.mysql.connector.connect')
     @patch('main_opgave.messagebox')
     def test_Insert_invalid_amount(self, mock_messagebox, mock_connect):
-        # Mock Entry widgets med ikke-numerisk amount
+        # Tester at insertItem fejler hvis amount ikke er et tal
         mock_itemID = Mock()
         mock_itemID.get.return_value = "Cola"
         mock_machineID = Mock()
         mock_machineID.get.return_value = "1"
         mock_amount = Mock()
-        mock_amount.get.return_value = "abc"  # Ikke et tal
+        mock_amount.get.return_value = "abc"  # ugyldig
 
-        # Mock database så den ikke kaldes
-        mock_conn = Mock()
-        mock_connect.return_value = mock_conn
-
-        # Kald funktionen med ugyldig amount
         main_opgave.insertItem(mock_itemID, mock_machineID, mock_amount)
         
-        # Verificer at fejlbesked blev vist
         mock_messagebox.showinfo.assert_called_with("Insert Error", "Amount must be a number")
-        # Verificer at database IKKE blev kaldt
         mock_connect.assert_not_called()
 
+# Testklasse til opdateringsfunktioner
 class TestUpdateFunctions(unittest.TestCase):
 
     @patch('main_opgave.mysql.connector.connect')
     @patch('main_opgave.Messageboxhandler')
     def test_UpdateMachine_valid_data(self, mock_messagebox, mock_connect):
-        # Setup mock database
+        # Tester at updateMachine kan køre med gyldige data og faktisk laver update i databasen
         mock_conn = Mock()
         mock_cursor = Mock()
         mock_connect.return_value = mock_conn
@@ -141,7 +123,6 @@ class TestUpdateFunctions(unittest.TestCase):
         mock_status = Mock()
         mock_status.get.return_value = "FULL"
 
-        # Kald updateMachine
         main_opgave.updateMachine(mock_machineID, mock_location, mock_status)
 
         mock_connect.assert_called_once()
@@ -150,72 +131,65 @@ class TestUpdateFunctions(unittest.TestCase):
     @patch('main_opgave.mysql.connector.connect')
     @patch('main_opgave.Messageboxhandler')
     def test_UpdateMachine_empty_machineID(self, mock_messagebox, mock_connect):
-        # Mock Entry widget med tomt machineID
+        # Tester at der gives fejl hvis machineID er tomt ved updateMachine
         mock_machineID = Mock()
         mock_machineID.get.return_value = ""
 
-        # Kald funktionen med tomt machineID
         main_opgave.updateMachine(mock_machineID, None, None)
         
-        # Verificer at fejlbesked blev vist
         mock_messagebox.assert_called_once_with("Update Status", "Failed: Must put machine id")
-        # Verificer at database IKKE blev kaldt
         mock_connect.assert_not_called()
 
     @patch('main_opgave.mysql.connector.connect')
     @patch('main_opgave.Messageboxhandler')
     def test_UpdateMachine_invalid_machineID(self, mock_messagebox, mock_connect):
-        # Mock Entry widget med ikke-numerisk machineID
+        # Tester at der gives fejl hvis ID ikke er et tal
         mock_machineID = Mock()
-        mock_machineID.get.return_value = "abc"  # Ikke et tal
+        mock_machineID.get.return_value = "abc"
         mock_location = Mock()
         mock_location.get.return_value = "Copenhagen"
         mock_status = Mock()
         mock_status.get.return_value = "FULL"
 
-        # Kald funktionen med ugyldig machineID
         main_opgave.updateMachine(mock_machineID, mock_location, mock_status)
         
-        # Verificer at fejlbesked blev vist
         mock_messagebox.assert_called_once_with("Update Status", "Failed: ID must be a number")
-        # Verificer at database IKKE blev kaldt
         mock_connect.assert_not_called()
     
     @patch('main_opgave.mysql.connector.connect')
     @patch('main_opgave.Messageboxhandler')
     def test_UpdateItems_empty_itemID(self, mock_messagebox, mock_connect):
-        # Mock Entry widget med tomt itemID
+        # Tester at der gives fejl hvis itemID mangler
         mock_itemID = Mock()
         mock_itemID.get.return_value = ""
 
-        # Kald funktionen med tomt itemID
         main_opgave.updateItems(mock_itemID, None, None)
         
-        # Verificer at fejlbesked blev vist
         mock_messagebox.assert_called_once_with("Fetch status", "Need to put item ID to update the item.")
-        # Verificer at database IKKE blev kaldt
         mock_connect.assert_not_called()
 
+# Testklasse til slettefunktioner
 class TestDeleteFunctions(unittest.TestCase):
     
     @patch("main_opgave.Messageboxhandler")
     def test_empty_id(self, mock_messagebox):
+        # Tester at der gives fejl hvis machineID mangler når man vil slette
         mock_machineID = Mock()
-        mock_machineID.get.return_value = ""  # empty input
+        mock_machineID.get.return_value = ""
 
         main_opgave.delete_Vending(mock_machineID)
 
         mock_messagebox.assert_called_once_with("Delete Error", "Please enter a machine ID")
 
-
     @patch("main_opgave.Messageboxhandler")
     @patch("main_opgave.mysql.connector.connect")
     def test_machine_not_exist(self, mock_connect, mock_messagebox):
+        # Tester at fejl vises hvis maskinen ikke findes i databasen
         mock_conn = Mock()
         mock_cursor = Mock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.fetchone.return_value = None  # simulate missing machine
+        mock_cursor.fetchone.return_value = None  # simulerer at maskinen ikke findes
 
         mock_machineID = Mock()
         mock_machineID.get.return_value = "999"
@@ -226,71 +200,64 @@ class TestDeleteFunctions(unittest.TestCase):
             "SELECT id FROM vending_machines WHERE id=%s", ("999",)
         )
         mock_messagebox.assert_called_with("Delete Error", "Machine 999 does not exist.")
-        mock_conn.commit.assert_not_called()  # DB not touched
-        
-
+        mock_conn.commit.assert_not_called()
 
     @patch("main_opgave.messagebox.askyesno", return_value=False)
     @patch("main_opgave.mysql.connector.connect")
     @patch("main_opgave.Messageboxhandler")
     def test_user_cancels(self, mock_messagebox, mock_connect, mock_askyesno):
+        # Tester at der ikke slettes noget hvis brugeren klikker "nej" på popup
         mock_conn = Mock()
         mock_cursor = Mock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.fetchone.return_value = (123,)  # machine exists
+        mock_cursor.fetchone.return_value = (123,)  # maskinen findes
 
         mock_machineID = Mock()
         mock_machineID.get.return_value = "123"
 
         main_opgave.delete_Vending(mock_machineID)
 
-        # Only the SELECT query should have run
+        # Kun SELECT skal køres når man trykker nej
         self.assertEqual(mock_cursor.execute.call_count, 1)
         mock_cursor.execute.assert_called_with(
             "SELECT id FROM vending_machines WHERE id=%s", ("123",)
         )
 
-        # Confirm deletion was asked
         mock_askyesno.assert_called_once_with("Confirm Delete", "Delete machine 123?")
-
-        # No commit should have happened
         mock_conn.commit.assert_not_called()
-
-        # No error message
         mock_messagebox.assert_not_called()
-
 
     @patch("main_opgave.messagebox.askyesno", return_value=True)
     @patch("main_opgave.Messageboxhandler")
     @patch("main_opgave.mysql.connector.connect")
     def test_successful_delete(self, mock_connect, mock_messagebox, mock_askyesno):
+        # Tester at man faktisk sletter når man klikker "ja"
         mock_conn = Mock()
         mock_cursor = Mock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.fetchone.return_value = (123,)  # machine exists
+        mock_cursor.fetchone.return_value = (123,)
 
         mock_machineID = Mock()
         mock_machineID.get.return_value = "123"
 
         main_opgave.delete_Vending(mock_machineID)
 
-        # Confirm deletion called
+        # Popup spørger om bekræftelse
         mock_askyesno.assert_called_once_with("Confirm Delete", "Delete machine 123?")
-        # Check delete queries
+        # Der køres tre SQL queries: SELECT og to DELETE
         self.assertEqual(mock_cursor.execute.call_count, 3)
         mock_conn.commit.assert_called_once()
         mock_messagebox.assert_called_with("Delete Status", "Vending machine 123 deleted successfully")
 
 class TestGetValuesFunctions(unittest.TestCase):
 
-
     @patch('main_opgave.mysql.connector.connect')
     @patch('main_opgave.messagebox')
     @patch('main_opgave.tree2')
     def test_getValues_empty_fields(self, mock_tree2, mock_messagebox, mock_connect):
-        # Patch the global variable directly
+        # Tester at man får fejl hvis alle felter er tomme (og status er OFFLINE)
         main_opgave.machineStatus = ['A', 'B', 'C', 'D', 'E', 'OFFLINE']
         
         machineid = Mock()
@@ -298,7 +265,7 @@ class TestGetValuesFunctions(unittest.TestCase):
         machinelocation = Mock()
         machinelocation.get.return_value = ''
         status = Mock()
-        status.get.return_value = 'OFFLINE'  # machineStatus[5]
+        status.get.return_value = 'OFFLINE'
         
         main_opgave.getValues(machineid, machinelocation, status)
         
@@ -309,7 +276,7 @@ class TestGetValuesFunctions(unittest.TestCase):
     @patch('main_opgave.messagebox')
     @patch('main_opgave.tree2')
     def test_getValues_with_fields(self, mock_tree2, mock_messagebox, mock_connect):
-        # Patch the global variable directly
+        # Tester at værdier bliver hentet korrekt fra databasen og tabellen viser nyt indhold
         main_opgave.machineStatus = ['A', 'B', 'C', 'D', 'E', 'OFFLINE']
         main_opgave.config = {"DB_HOST": "h", "DB_USER": "u", "DB_PASSWORD": "p", "DB_NAME": "db"}
 
@@ -346,6 +313,7 @@ class TestGetItemFunctions(unittest.TestCase):
     @patch('main_opgave.messagebox')
     @patch('main_opgave.tree')
     def test_getitem_empty_fields(self, mock_tree, mock_messagebox, mock_connect):
+        # Tester at fejlbesked vises når alle felter er tomme
         itemID = Mock()
         itemID.get.return_value = ''
         machineID = Mock()
@@ -362,7 +330,7 @@ class TestGetItemFunctions(unittest.TestCase):
     @patch('main_opgave.messagebox')
     @patch('main_opgave.tree')
     def test_getitem_with_fields(self, mock_tree, mock_messagebox, mock_connect):
-        # Prepare mocks
+        # Tester at varer bliver hentet og tabellen opdateret
         main_opgave.config = {"DB_HOST": "h", "DB_USER": "u", "DB_PASSWORD": "p", "DB_NAME": "db"}
 
         itemID = Mock()
@@ -393,9 +361,5 @@ class TestGetItemFunctions(unittest.TestCase):
 
 
 if __name__ == '__main__':
-
+    # Kører alle unittests når filen bliver kørt direkte
     unittest.main()
-
-
-
-
