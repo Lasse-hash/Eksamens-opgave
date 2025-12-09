@@ -8,6 +8,7 @@ window = Tk()
 
 window.geometry("350x150")
 
+messageboxstate = False
 
 config = dotenv_values(r".env")
 
@@ -33,6 +34,14 @@ tree2 = ttk.Treeview(window3, columns=("ID", "Location", "Status"), show="headin
 machineStatus = ["NONE", "FULL","HALF", "LOW", "EMPTY", "OFFLINE"]
 
 options = ["NONE", "Refill machine", "Report issue", "Request maintenance"]
+
+def Messageboxhandler(Messageboxheader, MessageboxText):
+
+    global messageboxstate
+    if messageboxstate == False:
+        messageboxstate = True
+        messagebox.showinfo(Messageboxheader, MessageboxText)
+        messageboxstate = False
 
 #region Widgets
 def menuwidgets():
@@ -203,27 +212,28 @@ def sendReport(employeemessage, Variable, machineID, location):
     machineid = machineID.get().strip()
     Location = location.get().strip()
     if not employee.replace(" ", "").isalpha():  
-        messagebox.showerror("Input Error", "Employee name must contain only letters")
+        Messageboxhandler("Input Error", "Employee name must contain only letters")
         return
 
         
-    messagebox.showinfo(
+    Messageboxhandler(
         "Report sent",
         f"Your message '{variable}' has been sent to {employee} at {machineid} for machine ID {Location}"
     )
 
 #region Insert Funtion
 def insertMachine(machineID, machineLocation, status):
+    global messageboxstate
     machineid = machineID.get().strip()
     machinelocation = machineLocation.get().strip()
     Status = status.get().strip()
     if machinelocation == "":
-        if status == machineStatus[0]:
-            messagebox.showinfo("Insert Status", "Location and Status required")
-            return
+        if Status == machineStatus[0]:
+                Messageboxhandler("Insert Status", "Location and Status required")
+                return
         else:
-            messagebox.showinfo("Insert Status", "Location required")
-            return
+                Messageboxhandler("Insert Status", "Location required")
+                return
         
     
     else: 
@@ -231,24 +241,23 @@ def insertMachine(machineID, machineLocation, status):
         cursorObject = conn.cursor()
         cursorObject.execute("INSERT INTO vending_machines (location, status) VALUES (%s, %s)", (machinelocation, Status))
         conn.commit()
-        cursorObject.close()
-        messagebox.showinfo("insert status", "inserted machine into database")
+        cursorObject.close()   
+        Messageboxhandler("insert status", "inserted machine into database")
         conn.close()
-
 
 def insertItem(itemID, machineID, amount):
     itemid = itemID.get().strip()
     machineid = machineID.get().strip()
     Amount = amount.get().strip()
     if itemid == "" or machineid == "" or Amount == "":
-        messagebox.showinfo("Insert Status", "All fields required")
+        Messageboxhandler("Insert Status", "All fields required")
         return  # Rettetelse på kode fra fordi unittest: kræver return for at stoppe funktionen
     else:
         try:
             Amount = int(Amount)  # Make sure amount is a number
         except ValueError:
-            return messagebox.showerror("Insert Error", "Amount must be a number")
-
+            Messageboxhandler("Insert Error", "Amount must be a number")
+            return
     conn = mysql.connector.connect(
         host=config["DB_HOST"],
         user=config["DB_USER"],
@@ -265,24 +274,22 @@ def insertItem(itemID, machineID, amount):
     conn.commit()
     cursor.close()
     conn.close()
-
-    messagebox.showinfo("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
-
+    Messageboxhandler("Insert Status", f"Inserted {Amount} of {itemid} into machine {machineid}")
     
-    if itemid == "" or machineid == "" or Amount == "":
-        messagebox.showerror("Insert Error", "All fields are required")
+    if itemid == "" or machineid == "" or Amount == "":    
+        Messageboxhandler("Insert Error", "All fields are required")
         return
 
     
-    if not itemid.replace(" ", "").isalpha():
-        messagebox.showerror("Insert Error", "Item name must contain only letters")
+    if not itemid.replace(" ", "").isalpha():    
+        Messageboxhandler("Insert Error", "Item name must contain only letters")
         return
 
    
     try:
         Amount = int(Amount)
     except ValueError:
-        messagebox.showerror("Insert Error", "Amount must be a number")
+        Messageboxhandler("Insert Error", "Amount must be a number")
         return
 #endregion
 
@@ -292,7 +299,7 @@ def getValues(machineid, machinelocation, status):
     machineLocation = machinelocation.get()
     machinestatus = status.get()
     if machineID == "" and machineLocation == "" and machinestatus == machineStatus[5]:
-        messagebox.showinfo("Update Status", "Failed: Must put machine id")
+        Messageboxhandler("Update Status", "Failed: Must put machine id")
     else:
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjeckt = conn.cursor()
@@ -334,7 +341,7 @@ def getitem(itemID, machineID, itemName):
     itemname = itemName.get()
 
     if itemid == "" and machineid == "" and itemname == "":
-        messagebox.showinfo("Get Status", "Atleast one field required to get values")
+        Messageboxhandler("Get Status", "Atleast one field required to get values")
     else:
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjeckt = conn.cursor()
@@ -374,14 +381,14 @@ def getitem(itemID, machineID, itemName):
 def updateValues(machineid, machinelocation, status, machineitem, itemamount):
     machineID = machineid.get()
     if machineID == "":
-        messagebox.showinfo("Update Status", "Failed: Must put machine id")
+        Messageboxhandler("Update Status", "Failed: Must put machine id")
     else:
         try:
             machineidTry = machineid.get()
             machineidTry = int(machineidTry)
             
         except ValueError:
-            messagebox.showinfo("Update Status", "Failed: ID must be a number")
+            Messageboxhandler("Update Status", "Failed: ID must be a number")
             return
         
         # Check om der er felter at opdatere FØR database forbindelse
@@ -391,7 +398,7 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
         itemAmount = itemamount.get() if itemamount else None
 
         if not (machineLocation or machinestatus or machineItem or itemAmount):
-            messagebox.showinfo("Fetch status", "Need atleast one line filled")
+            Messageboxhandler("Fetch status", "Need atleast one line filled")
             return
         
         # Kun valider itemamount hvis den ikke er None
@@ -400,7 +407,7 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
                 itemamountTry = itemamount.get()
                 itemamountTry = int(itemamountTry)
             except ValueError:
-                messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+                Messageboxhandler("Update Status", "Failed: Item Amount must be a number")
                 return
         
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
@@ -427,7 +434,7 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
             query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE vending_machines_id=%s" # nosec
 
             cursorObjekt.execute(query, tuple(prams))
-            messagebox.showinfo("Update Status", "Updated items")
+            Messageboxhandler("Update Status", "Updated items")
 
         if machineitem or itemamount is not None:
             sets = []
@@ -444,7 +451,7 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
             query = "UPDATE items SET " + ", ".join(sets) + " WHERE vending_machines_id=%s" # nosec
 
             cursorObjekt.execute(query, tuple(prams))
-            messagebox.showinfo("Update Status", "Updated items")
+            Messageboxhandler("Update Status", "Updated items")
 
         conn.commit()
         cursorObjekt.close() 
@@ -456,7 +463,7 @@ def updateValues(machineid, machinelocation, status, machineitem, itemamount):
 def delete_Vending(txt_machineID):
     machineID = txt_machineID.get().strip()
     if not machineID:
-        return messagebox.showerror("Delete Error", "Please enter a machine ID")
+        return Messageboxhandler("Delete Error", "Please enter a machine ID")
 
     try:
         conn = mysql.connector.connect(
@@ -470,10 +477,10 @@ def delete_Vending(txt_machineID):
         # Check if machine exists
         cursor.execute("SELECT id FROM vending_machines WHERE id=%s", (machineID,))
         if not cursor.fetchone():
-            return messagebox.showerror("Delete Error", f"Machine {machineID} does not exist.")
+            return Messageboxhandler("Delete Error", f"Machine {machineID} does not exist.")
 
         # Confirm deletion
-        if not messagebox.askyesno("Confirm Delete", f"Delete machine {machineID}?"):
+        if not Messageboxhandler.askyesno("Confirm Delete", f"Delete machine {machineID}?"):
             return
 
         # Delete items and machine
@@ -481,10 +488,10 @@ def delete_Vending(txt_machineID):
         cursor.execute("DELETE FROM vending_machines WHERE id=%s", (machineID,))
         conn.commit()
 
-        messagebox.showinfo("Delete Status", f"Vending machine {machineID} deleted successfully")
+        Messageboxhandler("Delete Status", f"Vending machine {machineID} deleted successfully")
 
     except mysql.connector.Error as err:
-        messagebox.showerror("Database Error", f"Error: {err}")
+        Messageboxhandler("Database Error", f"Error: {err}")
 
     finally:
         cursor.close()
@@ -494,12 +501,12 @@ def deleteItem(itemIDField):
     item_id = itemIDField.get().strip()
     
     if not item_id:
-        return messagebox.showerror("Delete Error", "Please enter an item ID")
+        return Messageboxhandler("Delete Error", "Please enter an item ID")
     
     try:
         item_id = int(item_id)
     except ValueError:
-        return messagebox.showerror("Delete Error", "Item ID must be a number")
+        return Messageboxhandler("Delete Error", "Item ID must be a number")
     
     try:
         conn = mysql.connector.connect(
@@ -515,24 +522,24 @@ def deleteItem(itemIDField):
         result = cursor.fetchone()
         
         if not result:
-            return messagebox.showerror("Delete Error", f"Item with ID {item_id} does not exist.")
+            return Messageboxhandler("Delete Error", f"Item with ID {item_id} does not exist.")
         
         item_name, machine_id = result
         
-        if not messagebox.askyesno("Confirm Delete", f"Delete '{item_name}' (ID: {item_id}) from machine {machine_id}?"):
+        if not Messageboxhandler.askyesno("Confirm Delete", f"Delete '{item_name}' (ID: {item_id}) from machine {machine_id}?"):
             return
         
         # Slet den specifikke item baseret på ID
         cursor.execute("DELETE FROM items WHERE id=%s", (item_id,))
         conn.commit()
 
-        messagebox.showinfo("Delete Status", f"Item '{item_name}' (ID: {item_id}) deleted successfully")
+        Messageboxhandler("Delete Status", f"Item '{item_name}' (ID: {item_id}) deleted successfully")
         
         # Ryd feltet
         itemIDField.delete(0, END)
 
     except mysql.connector.Error as err:
-        messagebox.showerror("Database Error", f"Error: {err}")
+        Messageboxhandler("Database Error", f"Error: {err}")
     finally:
         cursor.close()
         conn.close()   
