@@ -391,23 +391,12 @@ def updateMachine(machineid, machinelocation, status):
             Messageboxhandler("Update Status", "Failed: ID must be a number")
             return
         
-        # Check om der er felter at opdatere FØR database forbindelse
-        machineLocation = machinelocation.get() if machinelocation else None
-        machinestatus = status.get() if status else None
-       
-        if not (machineLocation or machinestatus or machineItem or itemAmount):
-            Messageboxhandler("Fetch status", "Need atleast one line filled")
+        machineLocation = machinelocation.get() if machinelocation else ""
+        machinestatus = status.get() if status else machineStatus[0]
+
+        if not (machineLocation or machinestatus):
+            Messageboxhandler("Fetch status", "Need atleast one field filled.")
             return
-
-
-        # Kun valider itemamount hvis den ikke er None
-        if itemamount is not None:
-            try:
-                itemamountTry = itemamount.get()
-                itemamountTry = int(itemamountTry)
-            except ValueError:
-                Messageboxhandler("Update Status", "Failed: Item Amount must be a number")
-                return
         
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
@@ -416,13 +405,6 @@ def updateMachine(machineid, machinelocation, status):
             "status": "status=%s",
             "location": "location=%s"
         }
-        
-        machineLocation = machinelocation.get() if machinelocation else ""
-        machinestatus = status.get() if status else machineStatus[0]
-
-        if not (machineLocation or machinestatus):
-            messagebox.showinfo("Fetch status", "Need atleast one field filled.")
-            return
 
         if machinelocation or status:
             sets = []
@@ -439,7 +421,7 @@ def updateMachine(machineid, machinelocation, status):
                 query = "UPDATE vending_machines SET " + ", ".join(sets) + " WHERE id=%s" # nosec
 
                 cursorObjekt.execute(query, tuple(prams))
-                messagebox.showinfo("Update Status", "Updated items")
+                Messageboxhandler("Update Status", "Updated items")
 
     conn.commit()
     cursor.close()
@@ -449,7 +431,7 @@ def updateItems(itemid, machineitem, itemamount):
     itemID = itemid.get()
 
     if itemID == "":
-        messagebox.showinfo("Fetch status", "Need to put item ID to update the item.")
+        Messageboxhandler("Fetch status", "Need to put item ID to update the item.")
         return
 
     else:
@@ -458,21 +440,21 @@ def updateItems(itemid, machineitem, itemamount):
             itemidTry = int(itemidTry)
             
         except ValueError:
-            messagebox.showinfo("Update Status", "Failed: ID must be a number")
+            Messageboxhandler("Update Status", "Failed: ID must be a number")
             return
         if itemamount:
             try:
                 itemamountTry = itemamount.get()
                 itemamountTry = int(itemamountTry)
             except ValueError:
-                messagebox.showinfo("Update Status", "Failed: Item Amount must be a number")
+                Messageboxhandler("Update Status", "Failed: Item Amount must be a number")
                 return
 
         machineItem = machineitem.get() if machineitem else ""
         itemAmount = itemamount.get() if itemamount else ""
 
         if not (machineItem or itemAmount):
-            messagebox.showinfo("Fetch status", "Need atleast one field filled.")
+            Messageboxhandler("Fetch status", "Need atleast one field filled.")
             return
 
         allowed_columns = {
@@ -480,8 +462,8 @@ def updateItems(itemid, machineitem, itemamount):
             "quantity": "quantity=%s",
         }
 
-            cursorObjekt.execute(query, tuple(prams))
-            Messageboxhandler("Update Status", "Updated items")
+        cursorObjekt.execute(query, tuple(prams))
+        Messageboxhandler("Update Status", "Updated items")
         conn = mysql.connector.connect(host=config["DB_HOST"], user=config["DB_USER"], password=config["DB_PASSWORD"], database=config["DB_NAME"])
         cursorObjekt = conn.cursor()
 
@@ -514,7 +496,8 @@ def updateItems(itemid, machineitem, itemamount):
 def delete_Vending(txt_machineID):
     machineID = txt_machineID.get().strip()
     if not machineID:
-        return Messageboxhandler("Delete Error", "Please enter a machine ID")
+        Messageboxhandler("Delete Error", "Please enter a machine ID")
+        return 
 
     try:
         conn = mysql.connector.connect(
@@ -531,7 +514,7 @@ def delete_Vending(txt_machineID):
             return Messageboxhandler("Delete Error", f"Machine {machineID} does not exist.")
 
         # Confirm deletion
-        if not Messageboxhandler.askyesno("Confirm Delete", f"Delete machine {machineID}?"):
+        if not messagebox.askyesno("Confirm Delete", f"Delete machine {machineID}?"):
             return
 
         # Delete items and machine
@@ -577,7 +560,7 @@ def deleteItem(itemIDField):
         
         item_name, machine_id = result
         
-        if not Messageboxhandler.askyesno("Confirm Delete", f"Delete '{item_name}' (ID: {item_id}) from machine {machine_id}?"):
+        if not messagebox.askyesno("Confirm Delete", f"Delete '{item_name}' (ID: {item_id}) from machine {machine_id}?"):
             return
         
         # Slet den specifikke item baseret på ID
